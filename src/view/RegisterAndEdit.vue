@@ -11,11 +11,12 @@
           <div class="card-body">
             <div>
               <!--can change width and height-->
-              <img :src="imgUrl" class="img-thumbnail rounded mx-auto d-block" width="350" height="350" alt="userImage">
+              <img :src="imgUrl" class="img-thumbnail rounded mx-auto d-block" width="350" height="350" alt="userImage"
+                   @error="setUserImageDefault">
               <input
-                  class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
-                  @change="openImage($event)"
-                  style="margin-top: 0.5em"
+                class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
+                @change="openImage($event)"
+                style="margin-top: 0.5em"
               >
               <button class="btn btn-secondary btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
             </div>
@@ -106,6 +107,9 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    editUserImage: {
+      type: String//Image
+    },
     onClickEdit: {
       type: Function,
       default: () => {
@@ -137,16 +141,12 @@ export default {
     }
   },
   mounted() {
-    console.log(11111111111111);
-
     if (this.editModal) {
-      console.log(22222222222222);
-      this.userInfo.firstName = this.editUser.firstName;
-      this.userInfo.lastName = this.editUser.lastName;
-      this.userInfo.email = this.editUser.email;
-      //console.log(this.editUser);// todo error here because the mounted to fast---------------------------------------
-      this.editPasswordRequired = false;
+      setTimeout(() => {
+        this.editUserSetUp();
+      }, 100);
     }
+
   },
   methods: {
 
@@ -161,30 +161,30 @@ export default {
         };
 
         await Api.register(registerInf)
-            .then((response) => {
-              this.user = response.data
-              const loginInf = {
-                "email": this.userInfo.email,
-                "password": this.userInfo.password
-              }
-              return Api.login(loginInf);
-            })
-            .then((response) => {
-              //todo token set and go to user profile
-              this.user = response.data;
-              this.$currentUser.setToken(this.user);
-              //todo the image
-              if (this.imgBaseData) {
-                Api.putUserImage(this.user.userId, this.imgBaseData);
-              }
-            })
-            .then(() => {
-              this.goToUserPage();
-            })
-            .catch((error) => {
-              console.log(this.error)
-              this.error = error.message;
-            });
+          .then((response) => {
+            this.user = response.data
+            const loginInf = {
+              "email": this.userInfo.email,
+              "password": this.userInfo.password
+            }
+            return Api.login(loginInf);
+          })
+          .then((response) => {
+            //todo token set and go to user profile
+            this.user = response.data;
+            this.$currentUser.setToken(this.user);
+            //todo the image
+            if (this.imgBaseData) {
+              Api.putUserImage(this.user.userId, this.imgBaseData);
+            }
+          })
+          .then(() => {
+            this.goToUserPage();
+          })
+          .catch((error) => {
+            console.log(this.error)
+            this.error = error.message;
+          });
       }
 
     },
@@ -194,10 +194,10 @@ export default {
      */
     validateRegister: function () {
       return this.userInfo.firstName.length &&
-          this.userInfo.lastName.length &&
-          this.userInfo.email.length &&
-          (this.userInfo.password.length >= MIN_PASSWORD_LENGTH) &&
-          (this.userInfo.password === this.confirmPassword);
+        this.userInfo.lastName.length &&
+        this.userInfo.email.length &&
+        (this.userInfo.password.length >= MIN_PASSWORD_LENGTH) &&
+        (this.userInfo.password === this.confirmPassword);
     },
     //todo update the function
     openImage: async function (event) {
@@ -230,20 +230,31 @@ export default {
         this.editPasswordRequired = this.userInfo.password.length || this.userInfo.currentPassword.length;
       }
     },
+    setUserImageDefault: function (e) {
+      e.target.src = require('../assets/profile-default.png');
+    },
+    editUserSetUp: function () {
+      this.userInfo.firstName = this.editUser.firstName;
+      this.userInfo.lastName = this.editUser.lastName;
+      this.userInfo.email = this.editUser.email;
+      this.editPasswordRequired = false;
+      this.imgUrl = this.editUserImage;
+
+    }
   },
 
   computed: {
     passwordOnInvalid() {
       this.checkPasswordEdit();
       return this.userInfo.password.length && this.userInfo.password.length < MIN_PASSWORD_LENGTH ?
-          "this.setCustomValidity('The password must be at least 8 characters in length.')" :
-          "this.setCustomValidity('')";
+        "this.setCustomValidity('The password must be at least 8 characters in length.')" :
+        "this.setCustomValidity('')";
     },
     confirmPasswordOnInvalid() {
       this.checkPasswordEdit();
       return this.confirmPassword !== this.userInfo.password ?
-          "this.setCustomValidity('Passwords do not match')" :
-          "this.setCustomValidity('')";
+        "this.setCustomValidity('Passwords do not match')" :
+        "this.setCustomValidity('')";
     }
   },
 

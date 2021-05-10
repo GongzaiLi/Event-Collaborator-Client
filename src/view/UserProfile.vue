@@ -52,7 +52,7 @@
                     <strong>X</strong>
                   </button>
                 </div>
-                <register-and-edit :edit-modal="true" :edit-user="user" :on-click-edit="editUser"/>
+                <register-and-edit :edit-modal="true" :edit-user="user" :on-click-edit="editUser" :edit-user-image="userImage" />
               </div>
             </div>
           </div>
@@ -87,6 +87,7 @@ export default {
     }
   },
   mounted() {//mounted
+
     this.userId = this.$route.params.userId;
     if (this.$currentUser.checkLoginUser(this.userId)) {
       this.getUser(this.userId);
@@ -97,16 +98,25 @@ export default {
   methods: {
     getUser: function (userId) {
       this.$api.getUser(userId, this.$currentUser.getToken())
-          .then((response) => {
-            this.user = response.data;
-            this.userImage = this.$api.getUserImage(this.userId);
-            this.foundUser = true;
-          })
-          .catch((error) => {
-            //todo do not find show not fund card
-            this.foundUser = false;
-            console.log(error);
-          });
+        .then((response) => {
+          this.user = response.data;
+          this.userImage = this.$api.getUserImage(this.userId);
+          this.foundUser = true;
+        })
+        .catch((error) => {
+          //todo do not find show not fund card
+          this.foundUser = false;
+          console.log(error);
+          ///**
+          this.user = {
+            firstName: "aaaa",
+            lastName: "bbbb",
+            email: "a@a",
+          }
+          this.foundUser = true;
+          //**/
+        });
+
     },
     editUser: function (editUserInf) {
       const editUser = {};
@@ -116,15 +126,15 @@ export default {
         }
       })
       this.$api.editUser(this.userId, editUser, this.$currentUser.getToken())
-          .then(() => {
-            //todo show the edit user successful
-            //----------------
-            this.getUser(this.userId);
+        .then(() => {
+          //todo show the edit user successful
+          //----------------
+          this.getUser(this.userId);
 
-          })
-          .catch((error) => {
-            alert(error.message);
-          })
+        })
+        .catch((error) => {
+          alert(error.message);
+        })
       window.$('#editUserModal').modal('hide');//
     },
     setUserImageDefault: function (e) {
