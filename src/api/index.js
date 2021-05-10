@@ -1,0 +1,50 @@
+import axios from 'axios';
+
+const SERVER_URL = "http://csse-s365docker1.canterbury.ac.nz:4001/api/v1/";
+//http://localhost:4941/api/v1/ //http://csse-s365docker1.canterbury.ac.nz:4001/api/v1/
+const instance = axios.create({
+    baseURL: SERVER_URL,
+    timeout: 1000
+});
+
+export default {
+
+    //users
+    register: (user) => instance.post('users/register', user),
+    login: (user) => instance.post('users/login', user),
+    logout: (token) => instance.post('users/logout', null, {headers: {'X-Authorization': token}}),
+    getUser: (userId, token) => instance.get(`users/${userId}`, {headers: {'X-Authorization': token}}),
+    editUser: (userId, userInfo, token) => instance.patch(`users/${userId}`, userInfo, {headers: {'X-Authorization': token}}),
+
+    //users.images
+    getUserImage: (userId) => {
+        return `${SERVER_URL}users/${userId}/image`;
+    },
+
+    putUserImage: (userId, userImage) => instance.put(`users/${userId}/image`, userImage),
+    deleteUserImage: (userId) => instance.delete(`users/${userId}/image`),
+
+    //event
+    getEvents: (searchParameters) => instance.get(`events/${searchParameters}`),
+    // searchParameters = '?startIndex=20&count=10&q=Pizza%20party&organizerId=11&sortBy=DATE_DESC'
+    createEvent: (event) => instance.post(`events`, event),
+    getEvent: (eventId) => instance.get(`events/${eventId}`),
+    deleteEvent: (eventId) => instance.delete(`events/${eventId}`),
+    editEvent: (eventId, event) => instance.post(`events/${eventId}`, event),
+    getEventCategories: () => instance.get(`events/categories`),
+
+
+    //event.images
+    getEventImage: (eventId) => {
+        return `${SERVER_URL}events/${eventId}/image`;
+    },
+
+    putEventImage: (eventId, eventImage) => instance.put(`events/${eventId}/image`, eventImage),
+
+    //events.attendees
+    getEventAttendees: (eventId) => instance.get(`events/${eventId}/attendees`),
+    createEventAttendees: (eventId) => instance.post(`events/${eventId}/attendees`),
+    deleteEventAttendees: (eventId) => instance.delete(`events${eventId}/attendees`),
+    updateEventAttendees: (eventId, userId) => instance.patch(`events/${eventId}/attendees/${userId}`),
+
+}
