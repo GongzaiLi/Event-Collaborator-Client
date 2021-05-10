@@ -3,19 +3,25 @@
     <event-search-bar @sentEventData="passEventData($event)"/><!-- pass events -->
     <div v-show="eventItem.length">
       <event-card
-        v-for="event in eventItem.slice(eventsMinRange, eventsMaxRange)"
-        v-bind:key="event"
-        :event-id='event.eventId'/>
-      <div v-show="eventItem.length">
-        <el-pagination
-            :page-size="20"
-            :pager-count="11"
-            layout="prev, pager, next"
-            :total="1000">
-        </el-pagination>
+          v-for="event in eventItem.slice(eventsMinRange, eventsMaxRange)"
+          v-bind:key="event"
+          :event-id='event.eventId'/>
+
+      <div class="container mt-4 mb-4">
+        <div class="d-flex justify-content-center row">
+          <el-pagination
+              @current-change="handleCurrentChange"
+              :page-size="perPage"
+              :pager-count="11"
+              layout="prev, pager, next"
+              :current-page="currentPage"
+              :total="totalEvents">
+          </el-pagination>
+        </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -42,6 +48,9 @@ export default {
     passEventData(events) {
       this.eventItem = events;
       this.totalEvents = this.eventItem.length;
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
     }
   },
   computed: {
