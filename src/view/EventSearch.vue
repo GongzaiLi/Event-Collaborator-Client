@@ -49,8 +49,8 @@ export default {
       this.eventItem = events;
       this.totalEvents = this.eventItem.length;
     },
-    handleCurrentChange(val) {
-      this.currentPage = val;
+    handleCurrentChange(currentPage) {
+      this.currentPage = currentPage;
     }
   },
   computed: {

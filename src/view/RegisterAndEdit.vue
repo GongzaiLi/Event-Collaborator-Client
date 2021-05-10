@@ -136,8 +136,11 @@ export default {
       editPasswordRequired: true,
     }
   },
-  updated() {
+  mounted() {
+    console.log(11111111111111);
+
     if (this.editModal) {
+      console.log(22222222222222);
       this.userInfo.firstName = this.editUser.firstName;
       this.userInfo.lastName = this.editUser.lastName;
       this.userInfo.email = this.editUser.email;
