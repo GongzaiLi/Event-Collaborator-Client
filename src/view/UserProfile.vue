@@ -79,14 +79,16 @@
                     icon="el-icon-info"
                     iconColor="red"
                     title="DO YOU WANT TO EDIT THE EVENT？"
+                    @Confirm="handleDelete(scope.$index, scope.row)"
+                    @Cancel="()=>{}"
                   >
                     <!--todo need check the button is working-->
                     <template #reference>
                       <el-button
                         size="mini"
                         type="danger"
-                        @click="handleDelete(scope.$index, scope.row)">Delete
-                      </el-button>
+                       >Delete
+                      </el-button><!-- @click="handleDelete(scope.$index, scope.row)"-->
                     </template>
 
                   </el-popconfirm>
@@ -167,7 +169,7 @@ export default {
         date: '2016-05-03',
         name: '王小虎',
         address: '上海市普陀区金沙江路 1516 弄'
-      }]
+      }],
     }
   },
   mounted() {//mounted
