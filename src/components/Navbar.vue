@@ -8,6 +8,9 @@
           <a class="nav-link" href="#" @click="goToEventPage">Event Search</a>
         </li>
         <li class="nav-item active" v-show="visible">  <!--todo if not login not show up-->
+          <a class="nav-link" href="#" @click="goToCreateEventPage">Create Event</a>
+        </li>
+        <li class="nav-item active" v-show="visible">  <!--todo if not login not show up-->
           <a class="nav-link" href="#" @click="goToUserPage">Profile</a>
         </li>
       </ul>
@@ -72,9 +75,12 @@ export default {
             alert(error.message);
           });
     },
+    goToCreateEventPage: function () {
+      this.$router.push({name: 'event-create'});
+    }
   },
   watch: {
-    //watch and check the user login or not
+    //todo watch and check the user login or not
     $route() {
       this.visible = this.$currentUser.checkLogin();
     }

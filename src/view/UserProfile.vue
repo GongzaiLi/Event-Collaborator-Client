@@ -1,6 +1,6 @@
 <template>
 
-  <div class="row py-5 px-4"> <!--todo need fix flash--->
+  <div class="row py-5 px-4"> <!--todo need fix flash and not find card--->
     <div class="col-md-5 mx-auto">
       <div class="bg-white shadow rounded overflow-hidden">
 
@@ -27,14 +27,14 @@
         </div>
 
 
-        <div class="px-4 py-3">
-          <h5 class="mb-0">Participating event</h5>
-          <div class="p-4 rounded shadow-sm bg-light">
-            <p class="mb-0">1</p><!--font-italic-->
-            <p class="mb-0">2</p>
-            <p class="mb-0">3</p>
-          </div>
-        </div>
+<!--        <div class="px-4 py-3">-->
+<!--          <h5 class="mb-0">Participating event</h5>-->
+<!--          <div class="p-4 rounded shadow-sm bg-light">-->
+<!--            <p class="mb-0">1</p>&lt;!&ndash;font-italic&ndash;&gt;-->
+<!--            <p class="mb-0">2</p>-->
+<!--            <p class="mb-0">3</p>-->
+<!--          </div>-->
+<!--        </div>-->
 
 
         <div class="modal fade" id="editUserModal"

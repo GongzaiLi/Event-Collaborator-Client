@@ -69,7 +69,7 @@
                                aria-label="Recipient's username" v-model="categoryId" min="0" step="1" required>
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary" type="submit" @click="addCategoryList">Add
-                          </button><!--todo need show category List>-->
+                          </button><!--todo need show category List> may use the tag-->
                         </div>
                       </div>
                     </form>
@@ -149,6 +149,7 @@ export default {
     }
   },
   mounted() {
+    //todo check login or not sortByOptionList has?????
     this.getCategories();
   },
   methods: {
