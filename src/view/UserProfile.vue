@@ -1,7 +1,7 @@
 <template>
 
   <div class="row py-5 px-4"> <!--todo need fix flash and not find card--->
-    <div class="col-md-5 mx-auto">
+    <div class="col-md-10 mx-auto">
       <div class="bg-white shadow rounded overflow-hidden">
 
 
@@ -27,14 +27,77 @@
         </div>
 
 
-<!--        <div class="px-4 py-3">-->
-<!--          <h5 class="mb-0">Participating event</h5>-->
-<!--          <div class="p-4 rounded shadow-sm bg-light">-->
-<!--            <p class="mb-0">1</p>&lt;!&ndash;font-italic&ndash;&gt;-->
-<!--            <p class="mb-0">2</p>-->
-<!--            <p class="mb-0">3</p>-->
-<!--          </div>-->
-<!--        </div>-->
+        <div class="px-4 py-3">
+          <h5 class="mb-0">Participating event</h5>
+          <div class="p-4 rounded shadow-sm bg-light">
+            <el-table
+              :data="tableData"
+              stripe
+              style="width: 100%"
+              :default-sort="{prop: 'date', order: 'descending'}"
+              max-height="250"
+              @row-click="goToEventProfile"
+            >
+              <el-table-column min-width="50" prop="image" label="Image" width="100">
+                <template v-slot="scope">
+                  <img class="rounded" :src="scope.row.image" width="50" height="50" alt="user"
+                       @error="setUserImageDefault"/>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="eventId"
+                label="Id"
+                sortable
+                width="100"/>
+              <el-table-column
+                prop="title"
+                label="Title"
+                sortable
+                width="180"/>
+              <el-table-column
+                prop="date"
+                label="Date"
+                sortable
+                width="180"/>
+              <el-table-column
+                prop="role"
+                label="Role"
+                sortable
+                width="100"/>
+
+              <!-- todo only owner can edit and delete-->
+              <el-table-column label="Action">
+                <template #default="scope">
+                  <el-button
+                    size="mini"
+                    @click="handleEdit(scope.$index, scope.row)">Edit
+                  </el-button>
+
+                  <el-popconfirm
+                    confirmButtonText='Ok'
+                    cancelButtonText='Cancel'
+                    icon="el-icon-info"
+                    iconColor="red"
+                    title="DO YOU WANT TO EDIT THE EVENT？"
+                  >
+                    <!--todo need check the button is working-->
+                    <template #reference>
+                      <el-button
+                        size="mini"
+                        type="danger"
+                        @click="handleDelete(scope.$index, scope.row)">Delete
+                      </el-button>
+                    </template>
+
+                  </el-popconfirm>
+
+                </template>
+              </el-table-column>
+
+            </el-table>
+
+          </div>
+        </div>
 
 
         <div class="modal fade" id="editUserModal"
@@ -52,7 +115,8 @@
                     <strong>X</strong>
                   </button>
                 </div>
-                <register-and-edit :edit-modal="true" :edit-user="user" :on-click-edit="editUser" :edit-user-image="userImage" />
+                <register-and-edit :edit-modal="true" :edit-user="user" :on-click-edit="editUser"
+                                   :edit-user-image="userImage"/>
               </div>
             </div>
           </div>
@@ -84,6 +148,26 @@ export default {
       foundUser: false,
       userId: null,
       userImage: '',
+      tableData: [{
+        eventId: 1,
+        date: '2016-05-02',
+        name: '王小虎',
+        address: '上海市普陀区金沙江路 1518 弄'
+
+
+      }, {
+        date: '2016-05-04',
+        name: '王小虎',
+        address: '上海市普陀区金沙江路 1517 弄'
+      }, {
+        date: '2016-05-01',
+        name: '王小虎',
+        address: '上海市普陀区金沙江路 1519 弄'
+      }, {
+        date: '2016-05-03',
+        name: '王小虎',
+        address: '上海市普陀区金沙江路 1516 弄'
+      }]
     }
   },
   mounted() {//mounted
@@ -139,7 +223,19 @@ export default {
     },
     setUserImageDefault: function (e) {
       e.target.src = require('../assets/profile-default.png');
-    }
+    },
+    handleEdit(index, row) {
+      //todo
+      console.log(index, row);
+    },
+    handleDelete(index, row) {
+      //todo
+      console.log(index, row);
+    },
+    goToEventProfile: function (event) {
+      console.log(event);
+      this.$router.push({name: 'event-profile', params: {eventId: event.eventId}});
+    },
 
   }
 }

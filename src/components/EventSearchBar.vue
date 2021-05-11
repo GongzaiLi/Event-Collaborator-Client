@@ -16,7 +16,7 @@
 
 
             <div class="collapse" id="collapseSearch"><!--collapse-->
-              <form @submit.prevent>
+              <form @submit="eventSearch"> <!---todo--->
 
                 <div class="form-row">
                   <div class="col-md-8 mb-3">
@@ -42,20 +42,26 @@
 
                   <div class="col-md-4 mb-3">
                     <label><strong>Results start with:</strong></label>
-                    <input type="number" class="form-control shadow" placeholder="Result start with"
-                           v-model="searchParameters.startIndex" min="0" step="1">
+                    <el-tooltip class="item" effect="light" content="Please input a positive integer">
+                      <input type="number" class="form-control shadow" placeholder="Result start with"
+                             v-model="searchParameters.startIndex" min="0" step="1">
+                    </el-tooltip>
                   </div>
 
                   <div class="col-md-4 mb-3">
                     <label><strong>Results number:</strong></label>
-                    <input type="number" class="form-control shadow" placeholder="Results number"
-                           v-model="searchParameters.count" min="0" step="1">
+                    <el-tooltip class="item" effect="light" content="Please input a positive integer">
+                      <input type="number" class="form-control shadow" placeholder="Results number"
+                             v-model="searchParameters.count" min="0" step="1">
+                    </el-tooltip>
                   </div>
 
                   <div class="col-md-4 mb-3">
                     <label><strong>Organizer Id:</strong></label>
-                    <input type="number" class="form-control shadow" placeholder="Organizer Id"
-                           v-model="searchParameters.organizerId" min="0" step="1">
+                    <el-tooltip class="item" effect="light" content="Please input a positive integer">
+                      <input type="number" class="form-control shadow" placeholder="Organizer Id"
+                             v-model="searchParameters.organizerId" min="0" step="1">
+                    </el-tooltip>
                   </div>
 
                 </div>
@@ -96,7 +102,7 @@
 
                 <div class="row">
                   <div class="col-md-10">
-                    <button class="btn btn-secondary btn-lg" type="submit" @click="eventSearch" style="width: 20%">
+                    <button class="btn btn-secondary btn-lg" type="submit" style="width: 20%">
                       Search
                     </button>
                   </div>
@@ -177,23 +183,23 @@ export default {
 
     getEvents: function () {
       Api.getEvents(this.query)
-          .then((response) => {
-            this.$emit('sentEventData', response.data);
-          })
-          .catch((error) => {
-            alert(error.message);
-          })
+        .then((response) => {
+          this.$emit('sentEventData', response.data);
+        })
+        .catch((error) => {
+          alert(error.message);
+        })
     },
 
     getCategories: function () {
       this.$api.getEventCategories()
-          .then((response) => {
-            this.categoryTypes = response.data;
-            // console.log(this.categoryTypes);
-          })
-          .catch((error) => {
-            alert(error.message);
-          })
+        .then((response) => {
+          this.categoryTypes = response.data;
+          // console.log(this.categoryTypes);
+        })
+        .catch((error) => {
+          alert(error.message);
+        })
     },
 
     setQuery: function () {

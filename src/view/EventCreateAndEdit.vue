@@ -11,9 +11,9 @@
                    width="350" height="350" alt="userImage"
                    @error="setUserImageDefault">
               <input
-                  class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
-                  @change="openImage($event)"
-                  style="margin-top: 0.5em"
+                class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
+                @change="openImage($event)"
+                style="margin-top: 0.5em"
               >
               <button class="btn btn-secondary btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
             </div>
@@ -36,36 +36,58 @@
               </el-form-item>
 
               <el-form-item label="Date:" prop="date" placeholder="Activity zone">
-                <!--                <el-col :span="11">-->
-                <!--                </el-col>-->
+
                 <el-date-picker type="date" placeholder="Pick a date" v-model="newEvent.date"
                                 style="width: 100%;"></el-date-picker>
               </el-form-item>
 
+              <el-tooltip class="item" effect="light" content="0 means no limit on the number of attendees"
+                          placement="top">
+                <el-form-item label="Capacity: " prop="capacity">
+                  <el-input v-model.number="newEvent.capacity" @blur="validateCapacity($event)"/>
 
-              <el-form-item label="Online" prop="delivery">
+                </el-form-item>
+              </el-tooltip>
+
+              <el-form-item label="Attend Req" prop="requiresAttendanceControl">
+                <el-switch v-model="newEvent.requiresAttendanceControl"></el-switch>
+              </el-form-item>
+
+
+              <el-form-item label="Online" prop="isOnline">
                 <el-switch v-model="newEvent.isOnline"></el-switch>
               </el-form-item>
 
-<!--              <el-form-item>-->
-<!--                <el-alert-->
-<!--                    title="0 means no limit on the number of attendees"-->
-<!--                    type="info"-->
-<!--                    show-icon />-->
-<!--              </el-form-item>-->
 
-              <el-form-item label="Capacity: " prop="capacity" placeholder="O means no limit on the number of attendees">
 
-                <el-input v-model="newEvent.capacity"></el-input>
+              <div v-if="!newEvent.isOnline">
+                <el-form-item label="Url: ">
+                  <el-input v-model="newEvent.url"></el-input>
+                </el-form-item>
+
+                <el-form-item label="Venue: " prop="venue">
+                  <el-input v-model="newEvent.venue"></el-input>
+                </el-form-item>
+              </div>
+
+              <el-form-item label="Url: " prop="url" v-else>
+                <el-input v-model="newEvent.url"></el-input>
               </el-form-item>
 
-              <el-form-item label="Describe: " prop="desc">
+
+              <el-form-item label="Fee: " prop="fee">
+                <el-input v-model.number="newEvent.fee"/>
+              </el-form-item>
+
+
+
+              <el-form-item label="Describe: " prop="description">
                 <el-input type="textarea" v-model="newEvent.description"></el-input>
               </el-form-item>
 
 
               <el-form-item>
-                <el-button type="primary" @click="submitForm('ruleForm')">Create</el-button>
+                <el-button type="primary" @click="eventCreate('ruleForm')">{{ eventModal }}</el-button>
                 <el-button @click="resetForm('ruleForm')">Reset</el-button>
               </el-form-item>
             </el-form>
@@ -104,32 +126,47 @@ export default {
       },
       rules: {
         title: [
-          {required: true, message: 'Please input Activity name', trigger: 'blur'},
-          {min: 1, message: 'Length should be 3 to 5', trigger: 'blur'}
+          {required: true, message: 'Please input Title', trigger: 'blur'},
+          {min: 0, message: 'Length should at least one', trigger: 'blur'}
         ],
         category: [
-          {required: true, message: 'Please select Activity zone', trigger: 'change'}
+          {required: false, message: 'Please select Activity zone', trigger: 'change'}
         ],
         date: [
           {type: 'date', required: true, message: 'Please pick a date', trigger: 'change'}
         ],
-        desc: [
-          {required: true, message: 'Please input activity form', trigger: 'blur'}
+        description: [
+          {required: true, message: 'Please input Describe', trigger: 'blur'},
+          {min: 0, message: 'Length should at least one', trigger: 'blur'}
         ],
         capacity: [
-          {type: 'number', required: true, message: 'Please input activity form', trigger: 'blur'},
-          {min: -1, message: '0 means no limit on the number of attendees', trigger: 'blur'},
-          {step: 1, message: 'Must be a Integer', trigger: 'blur'}
-        ]
+          {required: true, message: 'Please input a Max capacity', trigger: 'blur'},
+          {type: 'number', message: 'Please input a Number', trigger: 'blur'},
+        ],
+        venue: [
+          {required: true, message: 'Please input a venue', trigger: 'blur'},
+        ],
+        url: [
+          {required: true, message: 'Please input a url', trigger: 'blur'},
+          {type: 'url', message: 'Please input correct url', trigger: 'blur'},
+        ],
+        fee: [
+          {required: true, message: 'Please input a Max capacity', trigger: 'blur'},
+          {type: 'number', message: 'Please input a Number', trigger: 'blur'},
+        ],
       },
       defaultImage: require('../assets/profile-default.png'),
+      eventModal: 'Create',
     };
   },
   methods: {
-    submitForm(formName) {
+    eventCreate(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           alert('submit!');
+          // todo validate the request body
+          //todo call post event api - will back a event id
+          //todo then post event image
         } else {
           console.log('error submit!!');
           return false;
@@ -163,6 +200,13 @@ export default {
       this.imgUrl = this.defaultImage;
       this.removeImage = true;
     },
+    validateCapacity: function (e) {
+      let validate = new RegExp("^[0-9][0-9]*$").test(e.target.value);
+      if (!validate) {
+        this.$message.warning('Please input a Integer number');
+        e.target.value = '';
+      }
+    }
   }
 }
 </script>

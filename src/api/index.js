@@ -27,10 +27,10 @@ export default {
     //event
     getEvents: (searchParameters) => instance.get(`events/${searchParameters}`),
     // searchParameters = '?startIndex=20&count=10&q=Pizza%20party&organizerId=11&sortBy=DATE_DESC'
-    createEvent: (event) => instance.post(`events`, event),
+    createEvent: (event, token) => instance.post(`events`, event, {headers: {'X-Authorization': token}}),
     getEvent: (eventId) => instance.get(`events/${eventId}`),
-    deleteEvent: (eventId) => instance.delete(`events/${eventId}`),
-    editEvent: (eventId, event) => instance.post(`events/${eventId}`, event),
+    deleteEvent: (eventId, token) => instance.delete(`events/${eventId}`, {headers: {'X-Authorization': token}}),
+    editEvent: (eventId, event, token) => instance.patch(`events/${eventId}`, event, {headers: {'X-Authorization': token}}),
     getEventCategories: () => instance.get(`events/categories`),
 
 
@@ -39,7 +39,7 @@ export default {
         return `${SERVER_URL}events/${eventId}/image`;
     },
 
-    putEventImage: (eventId, eventImage) => instance.put(`events/${eventId}/image`, eventImage),
+    putEventImage: (eventId, eventImage, token) => instance.put(`events/${eventId}/image`, eventImage, {headers: {'X-Authorization': token}}),
 
     //events.attendees
     getEventAttendees: (eventId) => instance.get(`events/${eventId}/attendees`),

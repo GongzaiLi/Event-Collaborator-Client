@@ -60,9 +60,9 @@
           <el-table
               :data="tableData"
               style="width: 100%"
-              :default-sort="{prop: 'date', order: 'descending'}"
+              :default-sort="{prop: 'firstName', order: 'descending'}"
               max-height="250"
-          >
+          ><!--descending-->
             <el-table-column min-width="50" prop="image" label="Image">
               <template v-slot="scope">
                 <img class="rounded" :src="scope.row.image" width="50" height="50" alt="user"
@@ -105,7 +105,7 @@ export default {
         eventId: 0,
         title: "",
         categories: [],
-        organizerFirstName: "Scott",
+        organizerFirstName: "",
         organizerLastName: "Li",
         attendeeCount: 0,
         capacity: null,
@@ -129,7 +129,8 @@ export default {
         eventImageError: '',
         userImageError: ''
       },
-      loading: true
+      loading: true,
+
     }
   },
   mounted() {
