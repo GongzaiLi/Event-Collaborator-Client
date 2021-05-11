@@ -27,8 +27,8 @@
               <div class="row">
                 <strong class="col-5">Category:</strong>
                 <div class="col-6">
-                  <span class="mb-1" v-for="category in event.categories" v-bind:key="category">
-                    {{ category + '  ' }}<!--todo may need modify-->
+                  <span class="mb-1" v-for="(category, index) in categoriesResultList" v-bind:key="index">
+                    {{ category.name + ' | ' }}<!--todo may need modify-->
                   </span>
                 </div>
 
@@ -77,7 +77,7 @@ export default {
       event: {
         eventId: 2,
         title: "tile",
-        categories: [1, 2, 3, 4],
+        categories: [],
         organizerFirstName: "Scott",
         organizerLastName: "Li",
         attendeeCount: 0,
@@ -96,6 +96,8 @@ export default {
         eventImageError: '',
         userImageError: ''
       },
+      categoriesAllTypes: [],
+      categoriesResultList: [],
 
       eventImage: require('../assets/event-default.jpg'),
       userImage: require('../assets/profile-default.png'),
@@ -104,30 +106,34 @@ export default {
     }
   },
   mounted() {
-    this.getEvent();//todo
-
+    this.initCardInfo()
   },
   created() {
     //todo may use
   },
   methods: {
-
-    getEvent: function () {
-      Api.getEvent(this.eventId)
-        .then((response) => {
-          this.event = response.data;
-        })
-        .then(() => {
-          this.eventImage = Api.getEventImage(this.eventId);
-        })
-        .then(() => {
-          this.userImage = Api.getUserImage(this.event.organizerId);
-          this.loading = false;
-        })
-        .catch((error) => {
-          this.error.eventError = error.message;
-          this.loading = false;
-        })
+    initCardInfo: async function () {
+      await this.getCategories();
+      await this.getEvent();//todo
+      this.setUpCategoriesTypes();
+    },
+    getEvent: async function () {
+      await Api.getEvent(this.eventId)
+          .then((response) => {
+            this.event = response.data;
+            // console.log(this.event);
+          })
+          .then(() => {
+            this.eventImage = Api.getEventImage(this.eventId);
+          })
+          .then(() => {
+            this.userImage = Api.getUserImage(this.event.organizerId);
+            this.loading = false;
+          })
+          .catch((error) => {
+            this.error.eventError = error.message;
+            this.loading = false;
+          })
 
 
     },
@@ -140,6 +146,29 @@ export default {
     },
     setUserImageDefault: function (e) {
       e.target.src = require('../assets/profile-default.png');
+    },
+    getCategories: async function () {
+      await this.$api.getEventCategories()
+          .then((response) => {
+            this.categoriesAllTypes = response.data;
+          })
+          .catch((error) => {
+            alert(error.message);
+          })
+    },
+    setUpCategoriesTypes: function () {
+      this.categoriesResultList = [];
+      // console.log(this.event.categories, 11111);
+      this.event.categories.forEach((id) => {
+        // console.log(this.categoriesAllTypes, 22222222);
+        this.categoriesAllTypes.forEach((category) => {
+
+          if (id === category.id) {
+            this.categoriesResultList.push(category);
+          }
+        });
+      });
+      // console.log(this.categoriesResultList);
     }
 
   }

@@ -69,7 +69,7 @@
                                aria-label="Recipient's username" v-model="categoryId" min="0" step="1" required>
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary" type="submit" @click="addCategoryList">Add
-                          </button>
+                          </button><!--todo need show category List>-->
                         </div>
                       </div>
                     </form>
@@ -144,10 +144,12 @@ export default {
         'Title (Z-A)': 'ALPHABETICAL_DESC',
       },
       categoryId: null,
+      categoryTypes: [],
 
     }
   },
   mounted() {
+    this.getCategories();
   },
   methods: {
     switchSearchArea: function () {
@@ -174,12 +176,23 @@ export default {
 
     getEvents: function () {
       Api.getEvents(this.query)
-        .then((response) => {
-          this.$emit('sentEventData', response.data);
-        })
-        .catch((error) => {
-          alert(error.message);
-        })
+          .then((response) => {
+            this.$emit('sentEventData', response.data);
+          })
+          .catch((error) => {
+            alert(error.message);
+          })
+    },
+
+    getCategories: function () {
+      this.$api.getEventCategories()
+          .then((response) => {
+            this.categoryTypes = response.data;
+            // console.log(this.categoryTypes);
+          })
+          .catch((error) => {
+            alert(error.message);
+          })
     },
 
     setQuery: function () {
