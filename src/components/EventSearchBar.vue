@@ -16,7 +16,7 @@
 
 
             <div class="collapse" id="collapseSearch"><!--collapse-->
-              <form @submit="eventSearch"> <!---todo--->
+              <form @submit.prevent> <!---todo--->
 
                 <div class="form-row">
                   <div class="col-md-8 mb-3">
@@ -102,7 +102,7 @@
 
                 <div class="row">
                   <div class="col-md-10">
-                    <button class="btn btn-secondary btn-lg" type="submit" style="width: 20%">
+                    <button class="btn btn-secondary btn-lg" type="submit" @click="eventSearch" style="width: 20%">
                       Search
                     </button>
                   </div>
