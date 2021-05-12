@@ -172,16 +172,16 @@ export default {
   },
   mounted() {//mounted
     this.setUpUserProfile();
-    this.tableData.push({
-      image: '',
-      eventId: 1,
-      title: 'asdsadsa',
-      date: '2021/20010/',
-      role: 'organizer',
-      status: "status",
-      A:'SSS',
-      B:'SSS',
-    });
+    // this.tableData.push({
+    //   image: '',
+    //   eventId: 1,
+    //   title: 'asdsadsa',
+    //   date: '2021/20010/',
+    //   role: 'organizer',
+    //   status: "status",
+    //   A:'SSS',
+    //   B:'SSS',
+    // });
   },
   methods: {
     setUpUserProfile: function () {
