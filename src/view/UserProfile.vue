@@ -1,7 +1,7 @@
 <template>
 
   <div class="row py-5 px-4"> <!--todo need fix flash and not find card--->
-    <div class="col-md-10 mx-auto">
+    <div class="col-md-6 mx-auto">
       <div class="bg-white shadow rounded overflow-hidden">
 
 
@@ -31,68 +31,76 @@
           <h5 class="mb-0">Participating event</h5>
           <div class="p-4 rounded shadow-sm bg-light">
             <el-table
-              :data="tableData"
-              stripe
-              style="width: 100%"
-              :default-sort="{prop: 'date', order: 'descending'}"
-              max-height="250"
-              @row-click="goToEventProfile"
+                :data="tableData"
+                stripe
+                style="width: 100%"
+                :default-sort="{prop: 'eventId', order: 'increasing'}"
+                max-height="500"
+                @row-click="goToEventProfile"
             >
               <el-table-column min-width="50" prop="image" label="Image" width="100">
                 <template v-slot="scope">
                   <img class="rounded" :src="scope.row.image" width="50" height="50" alt="user"
-                       @error="setUserImageDefault"/>
+                       @error="setEventImageDefault"/>
                 </template>
               </el-table-column>
               <el-table-column
-                prop="eventId"
-                label="Id"
-                sortable
-                width="100"/>
+                  prop="eventId"
+                  label="Id"
+                  sortable
+                  width="50"/>
               <el-table-column
-                prop="title"
-                label="Title"
-                sortable
-                width="180"/>
+                  prop="title"
+                  label="Title"
+                  sortable
+                  width="150"/>
               <el-table-column
-                prop="date"
-                label="Date"
-                sortable
-                width="180"/>
+                  prop="date"
+                  label="Date"
+                  sortable
+                  width="150"/>
               <el-table-column
-                prop="role"
-                label="Role"
-                sortable
-                width="100"/>
+                  prop="role"
+                  label="Role"
+                  sortable
+                  width="80"/>
+              <el-table-column
+                  prop="status"
+                  label="Status"
+                  width="80"/>
 
-              <!-- todo only owner can edit and delete-->
-              <el-table-column label="Action">
+              <el-table-column label="Action" width="200">
                 <template #default="scope">
-                  <el-button
-                    size="mini"
-                    @click="handleEdit(scope.$index, scope.row)">Edit
-                  </el-button>
-
-                  <el-popconfirm
-                    confirmButtonText='Ok'
-                    cancelButtonText='Cancel'
-                    icon="el-icon-info"
-                    iconColor="red"
-                    title="DO YOU WANT TO EDIT THE EVENT？"
-                    @Confirm="handleDelete(scope.$index, scope.row)"
-                    @Cancel="()=>{}"
-                  >
-                    <!--todo need check the button is working-->
-                    <template #reference>
-                      <el-button
+                  <div v-if="scope.row.role === 'organizer'">
+                    <el-button
                         size="mini"
-                        type="danger"
-                       >Delete
-                      </el-button><!-- @click="handleDelete(scope.$index, scope.row)"-->
-                    </template>
+                        type="success"
+                        @click.stop="eventEdit(scope.$index, scope.row)">Edit
+                    </el-button>
 
-                  </el-popconfirm>
+                    <el-popconfirm
+                        confirmButtonText='Ok'
+                        cancelButtonText='Cancel'
+                        icon="el-icon-info"
+                        iconColor="red"
+                        title="DO YOU WANT TO EDIT THE EVENT？"
+                        @Confirm="eventDelete(scope.row)"
+                        @Cancel="()=>{}"
+                    >
+                      <template #reference>
+                        <el-button
+                            size="mini"
+                            type="danger"
+                        >Delete
+                        </el-button><!-- @click="handleDelete(scope.$index, scope.row)"-->
 
+                      </template>
+
+                    </el-popconfirm>
+                  </div>
+                  <div v-else>
+                    <span>No privilege</span>
+                  </div>
                 </template>
               </el-table-column>
 
@@ -132,8 +140,7 @@
 
 <script>
 import RegisterAndEdit from "./RegisterAndEdit";
-// import {ref} from 'vue';
-// import $ from 'jquery';
+
 
 export default {
   name: "UserProfile",
@@ -150,58 +157,44 @@ export default {
       foundUser: false,
       userId: null,
       userImage: '',
-      tableData: [{
-        eventId: 1,
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-
-
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }],
+      tableData: [],
     }
   },
   mounted() {//mounted
-
-    this.userId = this.$route.params.userId;
-    if (this.$currentUser.checkLoginUser(this.userId)) {
-      this.getUser(this.userId);
-    } else {
-      this.foundUser = false;
-    }
+    this.setUpUserProfile();
   },
   methods: {
+    setUpUserProfile: function () {
+      this.userId = this.$route.params.userId;
+      if (this.$currentUser.checkLoginUser(this.userId)) {
+        this.getUser(this.userId);
+        this.getEvents();
+      } else {
+        //todo show not find and register or login
+        this.foundUser = false;
+      }
+
+    },
     getUser: function (userId) {
       this.$api.getUser(userId, this.$currentUser.getToken())
-        .then((response) => {
-          this.user = response.data;
-          this.userImage = this.$api.getUserImage(this.userId);
-          this.foundUser = true;
-        })
-        .catch((error) => {
-          //todo do not find show not fund card
-          this.foundUser = false;
-          console.log(error);
-          ///**
-          this.user = {
-            firstName: "aaaa",
-            lastName: "bbbb",
-            email: "a@a",
-          }
-          this.foundUser = true;
-          //**/
-        });
+          .then((response) => {
+            this.user = response.data;
+            this.userImage = this.$api.getUserImage(this.userId);
+            this.foundUser = true;
+          })
+          .catch((error) => {
+            //todo do not find show not fund card
+            this.foundUser = false;
+            console.log(error);
+            ///**
+            this.user = {
+              firstName: "aaaa",
+              lastName: "bbbb",
+              email: "a@a",
+            }
+            this.foundUser = true;
+            //**/
+          });
 
     },
     editUser: function (editUserInf) {
@@ -212,32 +205,102 @@ export default {
         }
       })
       this.$api.editUser(this.userId, editUser, this.$currentUser.getToken())
-        .then(() => {
-          //todo show the edit user successful
-          //----------------
-          this.getUser(this.userId);
+          .then(() => {
+            //todo show the edit user successful
+            //todo call image api if image had
+            this.getUser(this.userId);
 
-        })
-        .catch((error) => {
-          alert(error.message);
-        })
+          })
+          .catch((error) => {
+            alert(error.message);
+          })
       window.$('#editUserModal').modal('hide');//
     },
     setUserImageDefault: function (e) {
       e.target.src = require('../assets/profile-default.png');
     },
-    handleEdit(index, row) {
+    getEvents: async function () {
+      this.tableData = [];
+      await this.$api.getEvents('')
+          .then((response) => {
+            response.data.forEach(async (event) => {
+              await this.getEventsAttendees(event.eventId)
+              await this.$api.getEvent(event.eventId).then((response) => {
+                if (response.data.organizerId === parseInt(this.userId)) {
+                  this.setUpTheTable(response.data, "accepted");
+                }
+              });
+            })
+          })
+          .catch((error) => {
+            //todo error
+            console.log(error);
+          })
+
+    },
+    getEventsAttendees: async function (eventId) {
+      await this.$api.getEventAttendees(eventId, this.$currentUser.getToken())
+          .then((response) => {
+            response.data.forEach(async (user) => {
+              if (user.attendeeId === parseInt(this.userId)) await this.getEvent(eventId, user.status);
+            })
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+
+
+    },
+    getEvent: async function (eventId, status) {
+      await this.$api.getEvent(eventId)
+          .then((response) => {
+            this.setUpTheTable(response.data, status)
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+    },
+    setUpTheTable: function (event, status) {
+
+
+      let tableItem = {};
+      tableItem.image = this.$api.getEventImage(event.id);
+      tableItem.eventId = event.id;
+      tableItem.title = event.title;
+      tableItem.date = event.date;
+      tableItem.role = this.$currentUser.checkLoginUser(event.organizerId) ? 'organizer' : 'attendee';
+      tableItem.status = status;
+      if (!this.checkTableHadItem(tableItem.eventId)) this.tableData.push(tableItem);
+
+    },
+    eventEdit(index, row) {
       //todo
       console.log(index, row);
     },
-    handleDelete(index, row) {
-      //todo
-      console.log(index, row);
+    eventDelete(row) {
+      this.$api.deleteEvent(row.eventId, this.$currentUser.getToken())
+          .then(()=> {
+            this.setUpUserProfile();
+          })
+          .catch((error) => {
+            console.log(error);
+          });
     },
     goToEventProfile: function (event) {
-      console.log(event);
       this.$router.push({name: 'event-profile', params: {eventId: event.eventId}});
     },
+    setEventImageDefault: function (e) {
+      e.target.src = require('../assets/event-default.jpg');
+    },
+    checkTableHadItem(eventId) {
+      for (const item of this.tableData) {
+        if (item.eventId === eventId) {
+          return true;
+        }
+      }
+      return false;
+
+    }
 
   }
 }

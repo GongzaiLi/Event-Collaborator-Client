@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <Navbar />
+    <el-affix>
+      <Navbar />
+    </el-affix>
     <router-view v-slot="{ Component }">
       <keep-alive>
         <component :is="Component" v-if="$route.meta.keepAlive"/>

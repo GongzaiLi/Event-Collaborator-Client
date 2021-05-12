@@ -173,8 +173,9 @@ export default {
           })
     },
     getEventAttendees: async function () {
-      await this.$api.getEventAttendees(this.eventId)
+      await this.$api.getEventAttendees(this.eventId, this.$currentUser.getToken())
           .then((response) => {
+            console.log(response.data);
             this.setUpAttendeesTable(response.data);
           })
           .catch((error) => {

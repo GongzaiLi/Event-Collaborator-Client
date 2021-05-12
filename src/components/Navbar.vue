@@ -68,12 +68,12 @@ export default {
     loginOut: async function () {
       await Api.logout(this.$currentUser.getToken())
           .then(() => {//IIFE
-            this.$currentUser.deleteToken();
             this.goToLoginPage();
           })
-          .catch((error) => {
-            alert(error.message);
+          .catch(() => {
+            // alert(error.message);
           });
+      this.$currentUser.deleteToken();
     },
     goToCreateEventPage: function () {
       this.$router.push({name: 'event-create'});

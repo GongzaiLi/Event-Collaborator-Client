@@ -42,7 +42,7 @@ export default {
     putEventImage: (eventId, eventImage, token) => instance.put(`events/${eventId}/image`, eventImage, {headers: {'X-Authorization': token}}),
 
     //events.attendees
-    getEventAttendees: (eventId) => instance.get(`events/${eventId}/attendees`),
+    getEventAttendees: (eventId, token) => instance.get(`events/${eventId}/attendees`, {headers: {'X-Authorization': token}}),
     createEventAttendees: (eventId) => instance.post(`events/${eventId}/attendees`),
     deleteEventAttendees: (eventId) => instance.delete(`events${eventId}/attendees`),
     updateEventAttendees: (eventId, userId) => instance.patch(`events/${eventId}/attendees/${userId}`),
