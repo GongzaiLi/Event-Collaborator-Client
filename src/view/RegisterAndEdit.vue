@@ -2,7 +2,7 @@
 
   <div class="container py-2">
     <div class="row justify-content-center">
-      <div class="col-md-6">
+      <div class="col-md-7">
         <div class="card shadow">
 
           <header v-show="!editModal" class="card-header">
@@ -24,7 +24,7 @@
           <hr>
 
           <div class="card-body">
-            <form @submit="onClickEdit(userInfo)">
+            <form @submit.prevent>
               <div class="form-group">
                 <b>First name</b>
                 <input type="text" class="form-control" v-model="userInfo.firstName" required/>
@@ -67,7 +67,7 @@
                 <button v-if="!editModal" type="submit" class="btn btn-secondary btn-block" v-on:click="register">
                   Register
                 </button>
-                <button v-if="editModal" type="submit" class="btn btn-secondary btn-block">
+                <button v-if="editModal" type="submit" class="btn btn-secondary btn-block" v-on:click="editUser">
                   Edit
                 </button>
               </div>
@@ -103,18 +103,13 @@ export default {
       type: Boolean,
       default: false
     },
-    editUser: {
+    editUserInfo: {
       type: Object,
       default: () => ({}),
     },
     editUserImage: {
       type: String//Image
     },
-    onClickEdit: {
-      type: Function,
-      default: () => {
-      },
-    }
   },
   data() {
     return {
@@ -142,13 +137,36 @@ export default {
   },
   mounted() {
     if (this.editModal) {
-      setTimeout(() => {
-        this.editUserSetUp();
-      }, 100);
+      // setTimeout(() => {
+      //   this.editUserSetUp(this.editUser);
+      // }, 100);
+      this.editUserSetUp(this.editUserInfo);
     }
 
   },
   methods: {
+    editUser: function () {
+      if (this.validateRegister()){
+      //todo should update
+      const editUser = {};
+      Object.keys(this.userInfo).forEach((key) => {
+        if (this.userInfo[key].length) {
+          editUser[key] = this.userInfo[key];
+        }
+      })
+      this.$api.editUser(this.userId, editUser, this.$currentUser.getToken())
+        .then(() => {
+          //todo show the edit user successful
+          //todo call image api if image had
+          this.getUser(this.userId);
+
+        })
+        .catch((error) => {
+          alert(error.message);
+        })
+      window.$('#editUserModal').modal('hide');//
+      }
+    },
 
     register: async function () {
 
@@ -233,10 +251,10 @@ export default {
     setUserImageDefault: function (e) {
       e.target.src = require('../assets/profile-default.png');
     },
-    editUserSetUp: function () {
-      this.userInfo.firstName = this.editUser.firstName;
-      this.userInfo.lastName = this.editUser.lastName;
-      this.userInfo.email = this.editUser.email;
+    editUserSetUp: function (user) {
+      this.userInfo.firstName = user.firstName;
+      this.userInfo.lastName = user.lastName;
+      this.userInfo.email = user.email;
       this.editPasswordRequired = false;
       this.imgUrl = this.editUserImage;
 
@@ -257,6 +275,14 @@ export default {
         "this.setCustomValidity('')";
     }
   },
+
+  watch: {
+    editUser(oldVal, newVal){
+      console.log(oldVal, 1111111);
+      console.log(newVal, 111111223);
+
+    }
+  }
 
 
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="container py-2">
     <div class="row justify-content-center">
-      <div class="col-md-8">
+      <div class="col-md-7">
         <div class="card shadow">
 
           <div class="card-body">
@@ -59,7 +59,6 @@
               </el-form-item>
 
 
-
               <div v-if="!newEvent.isOnline">
                 <el-form-item label="Url: ">
                   <el-input v-model="newEvent.url"></el-input>
@@ -80,24 +79,20 @@
               </el-form-item>
 
 
-
               <el-form-item label="Describe: " prop="description">
                 <el-input type="textarea" v-model="newEvent.description"></el-input>
               </el-form-item>
 
 
               <el-form-item>
-                <el-button type="primary" @click="eventCreate('ruleForm')">{{ eventModal }}</el-button>
+                <el-button v-if="editModal" type="primary" @click="eventEdit('ruleForm')">Edit</el-button>
+                <el-button v-else type="primary" @click="eventCreate('ruleForm')">Create</el-button>
                 <el-button @click="resetForm('ruleForm')">Reset</el-button>
               </el-form-item>
             </el-form>
 
-
           </div>
-          <!--                    <div v-if="error.length" class="alert alert-danger alert-dismissible fade show" role="alert"-->
-          <!--                         style="margin-top: 0.2em">-->
-          <!--                      {{ error }}-->
-          <!--                    </div>-->
+
         </div>
       </div>
 
@@ -110,6 +105,16 @@
 <script>
 export default {
   name: "event-create-edit",
+  props: {
+    editModal: {
+      type: Boolean,
+      default: false
+    },
+    editEventInfo: {
+      type: Object,
+      default: () => ({}),
+    },
+  },
   data() {
     return {
       newEvent: {
@@ -156,10 +161,23 @@ export default {
         ],
       },
       defaultImage: require('../assets/profile-default.png'),
-      eventModal: 'Create',
     };
   },
   methods: {
+    eventEdit(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          alert('submit!');
+          // todo validate the request body
+          //todo call post event api - will back a event id
+          //todo then post event image
+        } else {
+          console.log('error submit!!');
+          // window.$('#editUserModal').modal('hide');//
+          return false;
+        }
+      });
+    },
     eventCreate(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -206,6 +224,12 @@ export default {
         this.$message.warning('Please input a Integer number');
         e.target.value = '';
       }
+    }
+  },
+  watch: {
+    editEvent(oldVal, newVal){
+      console.log(oldVal, 11111119999999);
+      console.log(newVal, 111111223);
     }
   }
 }

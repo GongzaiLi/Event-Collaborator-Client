@@ -22,7 +22,7 @@ export default {
     },
 
     putUserImage: (userId, userImage) => instance.put(`users/${userId}/image`, userImage),
-    deleteUserImage: (userId) => instance.delete(`users/${userId}/image`),
+    deleteUserImage: (userId, token) => instance.delete(`users/${userId}/image`, {headers: {'X-Authorization': token}}),
 
     //event
     getEvents: (searchParameters) => instance.get(`events/${searchParameters}`),
@@ -43,8 +43,8 @@ export default {
 
     //events.attendees
     getEventAttendees: (eventId, token) => instance.get(`events/${eventId}/attendees`, {headers: {'X-Authorization': token}}),
-    createEventAttendees: (eventId) => instance.post(`events/${eventId}/attendees`),
-    deleteEventAttendees: (eventId) => instance.delete(`events${eventId}/attendees`),
-    updateEventAttendees: (eventId, userId) => instance.patch(`events/${eventId}/attendees/${userId}`),
+    createEventAttendees: (eventId, token) => instance.post(`events/${eventId}/attendees`, {headers: {'X-Authorization': token}}),
+    deleteEventAttendees: (eventId, token) => instance.delete(`events${eventId}/attendees`, {headers: {'X-Authorization': token}}),
+    updateEventAttendees: (eventId, userId, token) => instance.patch(`events/${eventId}/attendees/${userId}`, {headers: {'X-Authorization': token}}),
 
 }
