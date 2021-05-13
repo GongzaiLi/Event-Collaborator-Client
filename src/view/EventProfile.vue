@@ -10,7 +10,6 @@
           <img :src="eventImage" class="card-img" alt="event" @error="setEventImageDefault"/>
         </div>
 
-
         <div class="bg-light p-4 d-flex text-center">
 
           <div class="media align-items-center profile-head col-md-4">
@@ -52,16 +51,17 @@
             <p style="text-align: justify;">{{ event.description }}</p>
           </div>
         </div>
+
         <div class="py-4 px-4">
           <div class="d-flex align-items-center justify-content-between mb-3">
             <h5 class="mb-0">Attendees</h5>
           </div>
 
           <el-table
-              :data="tableData"
-              style="width: 100%"
-              :default-sort="{prop: 'firstName', order: 'descending'}"
-              max-height="250"
+            :data="tableData"
+            style="width: 100%"
+            :default-sort="{prop: 'firstName', order: 'descending'}"
+            max-height="250"
           ><!--descending-->
             <el-table-column min-width="50" prop="image" label="Image">
               <template v-slot="scope">
@@ -74,17 +74,30 @@
               </template>
             </el-table-column>
             <el-table-column
-                prop="firstName"
-                label="First Name"
-                sortable
-                width="250" />
+              prop="firstName"
+              label="First Name"
+              sortable
+              width="250"/>
             <el-table-column
-                prop="lastName"
-                label="Last Name"
-                sortable
-                width="250" />
+              prop="lastName"
+              label="Last Name"
+              sortable
+              width="250"/>
           </el-table>
         </div>
+
+
+        <div v-show="similarEvents.length>0">
+          <hr style="max-width: 100%"/>
+
+          <div class="px-4 py-3">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h5 class="mb-2">Similar event</h5>
+            </div>
+            <event-card v-for="eventId in similarEvents" v-bind:key="eventId" :event-id="eventId"/>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -93,8 +106,11 @@
 
 <script>
 
+import EventCard from "../components/EventCard";
+
 export default {
-  name: "event-profile", //todo ask 8
+  name: "event-profile",
+  components: {EventCard},
   data() {
     return {
       eventId: null,
@@ -130,7 +146,7 @@ export default {
         userImageError: ''
       },
       loading: true,
-
+      similarEvents: []
     }
   },
   mounted() {
@@ -142,45 +158,46 @@ export default {
       await this.getCategories();
       await this.getEvent();
       await this.getEventAttendees();
+      await this.getAllEvents();
       this.setUpCategoriesTypes();
     },
     getEvent: async function () {
       await this.$api.getEvent(this.eventId)
-          .then((response) => {
-            this.event = response.data;
-          })
-          .then(() => {
-            this.eventImage = this.$api.getEventImage(this.eventId);
-          })
-          .then(() => {
-            this.userImage = this.$api.getUserImage(this.event.organizerId);
-            this.loading = false;
-          })
-          .catch((error) => {
-            this.error.eventError = error.message;
-            this.loading = false;
-          })
+        .then((response) => {
+          this.event = response.data;
+        })
+        .then(() => {
+          this.eventImage = this.$api.getEventImage(this.eventId);
+        })
+        .then(() => {
+          this.userImage = this.$api.getUserImage(this.event.organizerId);
+          this.loading = false;
+        })
+        .catch((error) => {
+          this.error.eventError = error.message;
+          this.loading = false;
+        })
 
 
     },
     getCategories: async function () {
       await this.$api.getEventCategories()
-          .then((response) => {
-            this.categoriesAllTypes = response.data;
-          })
-          .catch((error) => {
-            alert(error.message);
-          })
+        .then((response) => {
+          this.categoriesAllTypes = response.data;
+        })
+        .catch((error) => {
+          alert(error.message);
+        })
     },
     getEventAttendees: async function () {
       await this.$api.getEventAttendees(this.eventId, this.$currentUser.getToken())
-          .then((response) => {
-            console.log(response.data);
-            this.setUpAttendeesTable(response.data);
-          })
-          .catch((error) => {
-            console.log(error.message);
-          })
+        .then((response) => {
+          console.log(response.data);
+          this.setUpAttendeesTable(response.data);
+        })
+        .catch((error) => {
+          console.log(error.message);
+        })
     },
     setUpCategoriesTypes: function () {
       this.categoriesResultList = [];
@@ -210,6 +227,25 @@ export default {
       })
 
     },
+    getAllEvents: async function () {
+      await this.$api.getEvents('')
+        .then((response) => {
+          response.data.forEach((event) => {
+            this.checkSimilarEvent(event);
+          })
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+    },
+    checkSimilarEvent: function (event) {
+      for (const category of this.categories) {
+        if (event.categories.includes(category)) {
+          this.similarEvents.push(event.eventId);
+          return;
+        }
+      }
+    }
   }
 }
 </script>

@@ -161,7 +161,7 @@ export default {
           {type: 'number', message: 'Please input a Number', trigger: 'blur'},
         ],
       },
-      defaultImage: require('../assets/profile-default.png'),
+      defaultImage: require('../assets/event-default.jpg'),
       eventImage: '',
 
     };
@@ -223,7 +223,7 @@ export default {
       this.$refs[formName].resetFields();
     },
     setUserImageDefault: function (e) {
-      e.target.src = require('../assets/profile-default.png');
+      e.target.src = require('../assets/event-default.jpg');
     },
     //todo update the function
     openImage: async function (event) {

@@ -47,6 +47,7 @@
 
 export default {
   name: "Navbar",
+  inject: ['reload'],
   data() {
     return {
       visible: false
@@ -55,6 +56,7 @@ export default {
   methods: {
     goToLoginPage: function () {
       this.$router.push({name: 'login'});
+      this.reload();
     },
     goToRegisterPage: function () {
       this.$router.push({name: 'register'});
@@ -67,12 +69,13 @@ export default {
     },
     loginOut: async function () {
       await this.$api.logout(this.$currentUser.getToken())
-          .then(() => {//IIFE
-            this.goToLoginPage();
-          })
-          .catch(() => {
-            // alert(error.message);
-          });
+        .then(() => {//IIFE
+          this.goToLoginPage();
+        })
+        .catch(() => {
+          // alert(error.message);
+        });
+      //this.goToLoginPage();
       this.$currentUser.deleteToken();
     },
     goToCreateEventPage: function () {
@@ -84,7 +87,6 @@ export default {
     $route() {
       this.visible = this.$currentUser.checkLogin();
     }
-
   }
 
 }

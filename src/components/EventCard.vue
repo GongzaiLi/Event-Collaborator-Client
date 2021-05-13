@@ -72,6 +72,7 @@ export default {
       type: Number,
     }
   },
+  inject: ['reload'],
   data() {
     return {
       event: {
@@ -108,9 +109,6 @@ export default {
   mounted() {
     this.initCardInfo()
   },
-  created() {
-    //todo may use
-  },
   methods: {
     initCardInfo: async function () {
       await this.getCategories();
@@ -140,6 +138,7 @@ export default {
 
     goToEventProfile: function () {
       this.$router.push({name: 'event-profile', params: {eventId: this.eventId}});
+      this.reload();
     },
     setEventImageDefault: function (e) {
       e.target.src = require('../assets/event-default.jpg');

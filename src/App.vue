@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <el-affix>
-      <Navbar />
+      <Navbar/>
     </el-affix>
-    <router-view v-slot="{ Component }">
+    <router-view v-slot="{ Component }" v-if="isRouterAlive">
       <keep-alive>
         <component :is="Component" v-if="$route.meta.keepAlive"/>
       </keep-alive>
@@ -14,11 +14,30 @@
 
 <script>
 import Navbar from "./components/Navbar";
+
 export default {
   name: 'App',
   components: {
     Navbar,
   },
+  provide() {// can inject very deep components
+    return {
+      reload: this.reload
+    }
+  },
+  data() {
+    return {
+      isRouterAlive: true,
+    }
+  },
+  methods: {
+    reload() {
+      this.isRouterAlive = false;
+      this.$nextTick(() => {
+        this.isRouterAlive = true;
+      })
+    }
+  }
 }
 </script>
 
