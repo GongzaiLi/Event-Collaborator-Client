@@ -123,7 +123,7 @@
                 <div class="col-md-10" style="text-align: right; margin-top: 25px">
                   <el-button type="danger" class="btn btn-outline-danger" data-dismiss="modal" circle icon="el-icon-close"/>
                 </div>
-                <event-create-and-edit v-if="eventModal" :edit-modal="true" :edit-event-info="editEventInfo" />
+                <event-create-and-edit v-if="eventModal" :edit-modal="true" :edit-event-info="editEventInfo"/>
                 <register-and-edit v-else :edit-modal="true" :edit-user-info="user"
                                    :edit-user-image="userImage"/>
 
@@ -258,6 +258,7 @@ export default {
 
     },
     eventEdit(row) {
+      console.log(row);
       this.editEventInfo = row;
       this.eventModal = true;
       window.$('#editUserModal').modal('show');//

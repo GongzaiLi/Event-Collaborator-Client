@@ -113,10 +113,11 @@ export default {
     editEventInfo: {
       type: Object,
       default: () => ({}),
-    },
+    }
   },
   data() {
     return {
+      eventId: 0,
       newEvent: {
         title: '',
         description: '',
@@ -161,7 +162,8 @@ export default {
         ],
       },
       defaultImage: require('../assets/profile-default.png'),
-      eventImage: ''
+      eventImage: '',
+
     };
   },
   mounted() {
@@ -182,31 +184,37 @@ export default {
       this.newEvent.fee = event.fee;
       this.newEvent.description = event.description;
       this.eventImage = event.image;
+      this.eventId = event.eventId;
 
     },
     eventEdit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!');
-          // todo validate the request body
-          //todo call post event api - will back a event id
-          //todo then post event image
+          this.$api.editEvent(this.eventId, this.newEvent, this.$currentUser.getToken())
+          .then(()=> {
+            //todo then put event image
+          })
+
         } else {
-          console.log('error submit!!');
-          // window.$('#editUserModal').modal('hide');//
+
           return false;
         }
       });
+      window.$('#editUserModal').modal('hide');//
     },
     eventCreate(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!');
-          // todo validate the request body
-          //todo call post event api - will back a event id
-          //todo then post event image
+          this.$api.createEvent(this.newEvent, this.$currentUser.getToken())
+              .then((response) => {
+                console.log(response.data.eventId);
+                //todo then put  event image
+              })
+              .catch((error) => {
+                console.log(error);
+              })
+
         } else {
-          console.log('error submit!!');
           return false;
         }
       });

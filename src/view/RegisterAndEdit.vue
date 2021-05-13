@@ -158,7 +158,7 @@ export default {
         this.$api.editUser(this.userId, editUser, this.$currentUser.getToken())
             .then(() => {
               //todo show the edit user successful
-              //todo call image api if image had
+              //todo call image api if image had or delete
               this.getUser(this.userId);
 
             })
