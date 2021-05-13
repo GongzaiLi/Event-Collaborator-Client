@@ -14,9 +14,9 @@
               <img :src="imgUrl" class="img-thumbnail rounded mx-auto d-block" width="350" height="350" alt="userImage"
                    @error="setUserImageDefault">
               <input
-                class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
-                @change="openImage($event)"
-                style="margin-top: 0.5em"
+                  class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
+                  @change="openImage($event)"
+                  style="margin-top: 0.5em"
               >
               <button class="btn btn-secondary btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
             </div>
@@ -48,11 +48,12 @@
               <div>
                 <div class="form-group" v-if="!editModal">
                   <b>Confirm Password</b>
+<!--                  <label for="password"></label>-->
                   <input type="password"
                          class="form-control"
                          v-model="confirmPassword"
                          required
-                         v-bind:oninput="confirmPasswordOnInvalid"/>
+                         v-bind:oninput="confirmPasswordOnInvalid" id="password"/>
                 </div>
                 <div class="form-group" v-else>
                   <b>New Password</b>
@@ -91,7 +92,7 @@
 </template>
 
 <script>
-import Api from '../api';
+// import Api from '../api';
 // import {onUpdated} from 'vue';
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -146,25 +147,25 @@ export default {
   },
   methods: {
     editUser: function () {
-      if (this.validateRegister()){
-      //todo should update
-      const editUser = {};
-      Object.keys(this.userInfo).forEach((key) => {
-        if (this.userInfo[key].length) {
-          editUser[key] = this.userInfo[key];
-        }
-      })
-      this.$api.editUser(this.userId, editUser, this.$currentUser.getToken())
-        .then(() => {
-          //todo show the edit user successful
-          //todo call image api if image had
-          this.getUser(this.userId);
+      if (this.validateRegister()) {
+        //todo should update
+        const editUser = {};
+        Object.keys(this.userInfo).forEach((key) => {
+          if (this.userInfo[key].length) {
+            editUser[key] = this.userInfo[key];
+          }
+        })
+        this.$api.editUser(this.userId, editUser, this.$currentUser.getToken())
+            .then(() => {
+              //todo show the edit user successful
+              //todo call image api if image had
+              this.getUser(this.userId);
 
-        })
-        .catch((error) => {
-          alert(error.message);
-        })
-      window.$('#editUserModal').modal('hide');//
+            })
+            .catch((error) => {
+              alert(error.message);
+            })
+        window.$('#editUserModal').modal('hide');//
       }
     },
 
@@ -178,31 +179,31 @@ export default {
           "password": this.userInfo.password
         };
 
-        await Api.register(registerInf)
-          .then((response) => {
-            this.user = response.data
-            const loginInf = {
-              "email": this.userInfo.email,
-              "password": this.userInfo.password
-            }
-            return Api.login(loginInf);
-          })
-          .then((response) => {
-            //todo token set and go to user profile
-            this.user = response.data;
-            this.$currentUser.setToken(this.user);
-            //todo the image
-            if (this.imgBaseData) {
-              Api.putUserImage(this.user.userId, this.imgBaseData);
-            }
-          })
-          .then(() => {
-            this.goToUserPage();
-          })
-          .catch((error) => {
-            console.log(this.error)
-            this.error = error.message;
-          });
+        await this.$api.register(registerInf)
+            .then((response) => {
+              this.user = response.data
+              const loginInf = {
+                "email": this.userInfo.email,
+                "password": this.userInfo.password
+              }
+              return this.$api.login(loginInf);
+            })
+            .then((response) => {
+              //todo token set and go to user profile
+              this.user = response.data;
+              this.$currentUser.setToken(this.user);
+              //todo the image
+              if (this.imgBaseData) {
+                this.$api.putUserImage(this.user.userId, this.imgBaseData);
+              }
+            })
+            .then(() => {
+              this.goToUserPage();
+            })
+            .catch((error) => {
+              console.log(this.error)
+              this.error = error.message;
+            });
       }
 
     },
@@ -212,10 +213,10 @@ export default {
      */
     validateRegister: function () {
       return this.userInfo.firstName.length &&
-        this.userInfo.lastName.length &&
-        this.userInfo.email.length &&
-        (this.userInfo.password.length >= MIN_PASSWORD_LENGTH) &&
-        (this.userInfo.password === this.confirmPassword);
+          this.userInfo.lastName.length &&
+          this.userInfo.email.length &&
+          (this.userInfo.password.length >= MIN_PASSWORD_LENGTH) &&
+          (this.userInfo.password === this.confirmPassword);
     },
     //todo update the function
     openImage: async function (event) {
@@ -265,22 +266,20 @@ export default {
     passwordOnInvalid() {
       this.checkPasswordEdit();
       return this.userInfo.password.length && this.userInfo.password.length < MIN_PASSWORD_LENGTH ?
-        "this.setCustomValidity('The password must be at least 8 characters in length.')" :
-        "this.setCustomValidity('')";
+          "this.setCustomValidity('The password must be at least 8 characters in length.')" :
+          "this.setCustomValidity('')";
     },
     confirmPasswordOnInvalid() {
       this.checkPasswordEdit();
       return this.confirmPassword !== this.userInfo.password ?
-        "this.setCustomValidity('Passwords do not match')" :
-        "this.setCustomValidity('')";
+          "this.setCustomValidity('Passwords do not match')" :
+          "this.setCustomValidity('')";
     }
   },
 
   watch: {
-    editUser(oldVal, newVal){
-      console.log(oldVal, 1111111);
-      console.log(newVal, 111111223);
-
+    editUser(user) {
+      this.editUserSetUp(user);
     }
   }
 

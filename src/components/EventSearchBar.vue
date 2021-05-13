@@ -123,7 +123,7 @@
 </template>
 
 <script>
-import Api from '../api';
+// import Api from '../api';
 
 export default {
   name: "event-search-bar",
@@ -182,7 +182,7 @@ export default {
     },
 
     getEvents: function () {
-      Api.getEvents(this.query)
+      this.$api.getEvents(this.query)
         .then((response) => {
           this.$emit('sentEventData', response.data);
         })

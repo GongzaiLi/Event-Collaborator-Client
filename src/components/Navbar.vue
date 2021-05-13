@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import Api from '../api';
+// import Api from '../api';
 
 export default {
   name: "Navbar",
@@ -66,7 +66,7 @@ export default {
       this.$router.push({name: 'event-search'});
     },
     loginOut: async function () {
-      await Api.logout(this.$currentUser.getToken())
+      await this.$api.logout(this.$currentUser.getToken())
           .then(() => {//IIFE
             this.goToLoginPage();
           })

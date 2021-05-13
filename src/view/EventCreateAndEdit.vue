@@ -7,13 +7,13 @@
           <div class="card-body">
             <div>
               <!--can change width and height-->
-              <img :src="require('../assets/event-default.jpg')" class="img-thumbnail rounded mx-auto d-block"
+              <img :src="eventImage" class="img-thumbnail rounded mx-auto d-block"
                    width="350" height="350" alt="userImage"
                    @error="setUserImageDefault">
               <input
-                class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
-                @change="openImage($event)"
-                style="margin-top: 0.5em"
+                  class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
+                  @change="openImage($event)"
+                  style="margin-top: 0.5em"
               >
               <button class="btn btn-secondary btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
             </div>
@@ -161,9 +161,29 @@ export default {
         ],
       },
       defaultImage: require('../assets/profile-default.png'),
+      eventImage: ''
     };
   },
+  mounted() {
+    if (this.editModal) {
+      this.editEventSetUp(this.editEventInfo);
+    }
+  },
   methods: {
+    editEventSetUp(event) {
+      this.newEvent.title = event.title;
+      this.newEvent.categoryIds = event.categoryIds;
+      this.newEvent.date = event.date;
+      this.newEvent.isOnline = event.isOnline === 1;
+      this.newEvent.url = event.url;
+      this.newEvent.venue = event.venue;
+      this.newEvent.capacity = event.capacity || 0;
+      this.newEvent.requiresAttendanceControl = event.requiresAttendanceControl === 1;
+      this.newEvent.fee = event.fee;
+      this.newEvent.description = event.description;
+      this.eventImage = event.image;
+
+    },
     eventEdit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -227,9 +247,8 @@ export default {
     }
   },
   watch: {
-    editEvent(oldVal, newVal){
-      console.log(oldVal, 11111119999999);
-      console.log(newVal, 111111223);
+    editEventInfo(event) {
+      this.editEventSetUp(event);
     }
   }
 }

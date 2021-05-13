@@ -132,12 +132,6 @@
           </div>
         </div>
 
-
-
-
-
-
-
       </div>
     </div>
   </div>
@@ -172,16 +166,6 @@ export default {
   },
   mounted() {//mounted
     this.setUpUserProfile();
-    // this.tableData.push({
-    //   image: '',
-    //   eventId: 1,
-    //   title: 'asdsadsa',
-    //   date: '2021/20010/',
-    //   role: 'organizer',
-    //   status: "status",
-    //   A:'SSS',
-    //   B:'SSS',
-    // });
   },
   methods: {
     setUpUserProfile: function () {
@@ -262,7 +246,6 @@ export default {
         })
     },
     setUpTheTable: function (event, status) {
-
       //todo can keep many data.. keep all event data in the table data.
       let tableItem = event;
       tableItem.image = this.$api.getEventImage(event.id);
@@ -277,10 +260,7 @@ export default {
     eventEdit(row) {
       this.editEventInfo = row;
       this.eventModal = true;
-      this.editEventInfo = {name:'asd'};
       window.$('#editUserModal').modal('show');//
-
-      // console.log(row);
     },
     eventDelete(row) {
       this.$api.deleteEvent(row.eventId, this.$currentUser.getToken())
@@ -307,7 +287,6 @@ export default {
     },
     setUserModal() {
       this.eventModal = false;
-      this.user.firstName = 'mmmmm';
       window.$('#editUserModal').modal('show');//
     },
 

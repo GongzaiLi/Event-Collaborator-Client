@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import Api from '../api';
+// import Api from '../api';
 
 export default {
   name: "event-card",
@@ -118,16 +118,16 @@ export default {
       this.setUpCategoriesTypes();
     },
     getEvent: async function () {
-      await Api.getEvent(this.eventId)
+      await this.$api.getEvent(this.eventId)
           .then((response) => {
             this.event = response.data;
             // console.log(this.event);
           })
           .then(() => {
-            this.eventImage = Api.getEventImage(this.eventId);
+            this.eventImage = this.$api.getEventImage(this.eventId);
           })
           .then(() => {
-            this.userImage = Api.getUserImage(this.event.organizerId);
+            this.userImage = this.$api.getUserImage(this.event.organizerId);
             this.loading = false;
           })
           .catch((error) => {

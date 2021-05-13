@@ -50,7 +50,7 @@
 </style>
 
 <script>
-import Api from '../api';
+// import Api from '../api';
 
 export default {
   data() {
@@ -73,7 +73,7 @@ export default {
       //k@gmail.com abc123
       if (this.validateLogin()) {
         //console.log(this.loginInf);
-        await Api.login(this.loginInf)
+        await this.$api.login(this.loginInf)
             .then((response) => {//IIFE
               this.user = response.data;
               this.$currentUser.setToken(this.user);// set the token in the local
