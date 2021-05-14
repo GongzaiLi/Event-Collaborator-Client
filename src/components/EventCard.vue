@@ -137,8 +137,8 @@ export default {
     },
 
     goToEventProfile: function () {
-      this.$router.push({name: 'event-profile', params: {eventId: this.eventId}});
       this.reload();
+      this.$router.push({name: 'event-profile', params: {eventId: this.eventId}});
     },
     setEventImageDefault: function (e) {
       e.target.src = require('../assets/event-default.jpg');

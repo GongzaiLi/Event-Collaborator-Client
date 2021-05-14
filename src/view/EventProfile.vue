@@ -46,7 +46,7 @@
         </div>
 
         <div class="px-4 py-3">
-          <h5 class="mb-0">Description</h5>
+          <h5 class="mb-0"><i class="el-icon-collection"/>Description</h5>
           <div class="p-4 rounded shadow-sm bg-light">
             <p style="text-align: justify;">{{ event.description }}</p>
           </div>
@@ -54,7 +54,7 @@
 
         <div class="py-4 px-4">
           <div class="d-flex align-items-center justify-content-between mb-3">
-            <h5 class="mb-0">Attendees</h5>
+            <h5 class="mb-0"><i class="el-icon-mobile-phone"/>Attendees</h5>
           </div>
 
           <el-table
@@ -92,10 +92,16 @@
 
           <div class="px-4 py-3">
             <div class="d-flex align-items-center justify-content-between mb-3">
-              <h5 class="mb-2">Similar event</h5>
+              <h5 class="mb-2"><i class="el-icon-loading"/>Similar event</h5>
             </div>
-            <event-card v-for="eventId in similarEvents" v-bind:key="eventId" :event-id="eventId"/>
+
+            <el-carousel indicator-position="outside">
+              <el-carousel-item v-for="eventId in similarEvents" v-bind:key="eventId">
+                <event-card :event-id="eventId" />
+              </el-carousel-item>
+            </el-carousel>
           </div>
+
         </div>
 
       </div>
@@ -150,11 +156,11 @@ export default {
     }
   },
   mounted() {
-    this.eventId = this.$route.params.eventId;
     this.initEventProfile();
   },
   methods: {
     initEventProfile: async function () {
+      this.eventId = this.$route.params.eventId;
       await this.getCategories();
       await this.getEvent();
       await this.getEventAttendees();
@@ -163,41 +169,41 @@ export default {
     },
     getEvent: async function () {
       await this.$api.getEvent(this.eventId)
-        .then((response) => {
-          this.event = response.data;
-        })
-        .then(() => {
-          this.eventImage = this.$api.getEventImage(this.eventId);
-        })
-        .then(() => {
-          this.userImage = this.$api.getUserImage(this.event.organizerId);
-          this.loading = false;
-        })
-        .catch((error) => {
-          this.error.eventError = error.message;
-          this.loading = false;
-        })
+          .then((response) => {
+            this.event = response.data;
+          })
+          .then(() => {
+            this.eventImage = this.$api.getEventImage(this.eventId);
+          })
+          .then(() => {
+            this.userImage = this.$api.getUserImage(this.event.organizerId);
+            this.loading = false;
+          })
+          .catch((error) => {
+            this.error.eventError = error.message;
+            this.loading = false;
+          })
 
 
     },
     getCategories: async function () {
       await this.$api.getEventCategories()
-        .then((response) => {
-          this.categoriesAllTypes = response.data;
-        })
-        .catch((error) => {
-          alert(error.message);
-        })
+          .then((response) => {
+            this.categoriesAllTypes = response.data;
+          })
+          .catch((error) => {
+            alert(error.message);
+          })
     },
     getEventAttendees: async function () {
       await this.$api.getEventAttendees(this.eventId, this.$currentUser.getToken())
-        .then((response) => {
-          console.log(response.data);
-          this.setUpAttendeesTable(response.data);
-        })
-        .catch((error) => {
-          console.log(error.message);
-        })
+          .then((response) => {
+            // console.log(response.data);
+            this.setUpAttendeesTable(response.data);
+          })
+          .catch((error) => {
+            console.log(error.message);
+          })
     },
     setUpCategoriesTypes: function () {
       this.categoriesResultList = [];
@@ -229,27 +235,51 @@ export default {
     },
     getAllEvents: async function () {
       await this.$api.getEvents('')
-        .then((response) => {
-          response.data.forEach((event) => {
-            this.checkSimilarEvent(event);
+          .then((response) => {
+
+            response.data.forEach((event) => {
+              this.checkSimilarEvent(event);
+            })
           })
-        })
-        .catch((error) => {
-          console.log(error);
-        })
+          .catch((error) => {
+            console.log(error);
+          })
     },
     checkSimilarEvent: function (event) {
-      for (const category of this.categories) {
-        if (event.categories.includes(category)) {
+      for (const category of this.event.categories) {
+        if (event.categories.includes(category) && this.eventId !== event.eventId.toString()) {
           this.similarEvents.push(event.eventId);
           return;
         }
       }
+    },
+    // reload: function () {
+    //   // this.$router.go(0);
+    // }
+  },
+  watch: {
+    $route() {
+      this.initEventProfile();
     }
   }
 }
 </script>
 
 <style scoped>
+.el-carousel__item h3 {
+  color: #FFFFFF;
+  font-size: 14px;
+  opacity: 0.75;
+  line-height: 300px;
+  margin: 0;
+}
+
+.el-carousel__item:nth-child(2n) {
+  background-color: #FFFFFF;
+}
+
+.el-carousel__item:nth-child(2n+1) {
+  background-color: #FFFFFF;
+}
 
 </style>
