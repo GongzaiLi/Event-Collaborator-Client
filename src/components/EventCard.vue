@@ -72,7 +72,7 @@ export default {
       type: Number,
     }
   },
-  inject: ['reload'],
+  // inject: ['reload'],
   data() {
     return {
       event: {
@@ -137,7 +137,7 @@ export default {
     },
 
     goToEventProfile: function () {
-      this.reload();
+      // this.reload();
       this.$router.push({name: 'event-profile', params: {eventId: this.eventId}});
     },
     setEventImageDefault: function (e) {

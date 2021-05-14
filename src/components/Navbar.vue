@@ -47,7 +47,7 @@
 
 export default {
   name: "Navbar",
-  inject: ['reload'],
+  // inject: ['reload'],
   data() {
     return {
       visible: false
@@ -56,7 +56,7 @@ export default {
   methods: {
     goToLoginPage: function () {
       this.$router.push({name: 'login'});
-      this.reload();
+      // this.reload();
     },
     goToRegisterPage: function () {
       this.$router.push({name: 'register'});

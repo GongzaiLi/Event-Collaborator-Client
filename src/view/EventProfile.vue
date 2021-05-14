@@ -97,7 +97,7 @@
 
             <el-carousel indicator-position="outside">
               <el-carousel-item v-for="eventId in similarEvents" v-bind:key="eventId">
-                <event-card :event-id="eventId" />
+                <event-card :event-id="eventId"  /><!-- @click="reload" -->
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -259,6 +259,7 @@ export default {
   },
   watch: {
     $route() {
+      this.$router.go(0);
       this.initEventProfile();
     }
   }
