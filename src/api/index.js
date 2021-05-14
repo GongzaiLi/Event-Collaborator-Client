@@ -43,8 +43,8 @@ export default {
 
     //events.attendees
     getEventAttendees: (eventId, token) => instance.get(`events/${eventId}/attendees`, {headers: {'X-Authorization': token}}),
-    createEventAttendees: (eventId, token) => instance.post(`events/${eventId}/attendees`, null,{headers: {'X-Authorization': token}}),
+    createEventAttendees: (eventId, token) => instance.post(`events/${eventId}/attendees`, null, {headers: {'X-Authorization': token}}),
     deleteEventAttendees: (eventId, token) => instance.delete(`events/${eventId}/attendees`, {headers: {'X-Authorization': token}}),
-    updateEventAttendees: (eventId, userId, token) => instance.patch(`events/${eventId}/attendees/${userId}`, {headers: {'X-Authorization': token}}),
+    updateEventAttendees: (eventId, userId, status, token) => instance.patch(`events/${eventId}/attendees/${userId}`, status, {headers: {'X-Authorization': token}}),
 
 }

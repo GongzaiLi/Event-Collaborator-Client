@@ -65,7 +65,7 @@
           <el-table
               :data="tableData"
               style="width: 100%"
-              :default-sort="{prop: 'firstName', order: 'descending'}"
+              :default-sort="{prop: 'dateOfInterest', order: 'descending'}"
               max-height="250"><!--descending-->
             <el-table-column min-width="50" prop="image" label="Image" width="150">
               <template v-slot="scope">
@@ -93,9 +93,32 @@
                 sortable
                 width="150"/>
             <el-table-column
+                prop="dateOfInterest"
+                label="Date Of Interest"
+                sortable
+                width="150"/>
+            <el-table-column
                 prop="status"
                 label="Status"
-                width="150"/>
+                width="100"/>
+
+
+            <el-table-column label="Action" width="180" prop="options">
+              <template #default="scope">
+                <div v-if="checkRole && scope.row.status === 'pending'">
+                  <!--todo not sure only can change pending or other status-->
+                  <el-button
+                      size="mini"
+                      type="success"
+                      @click.stop="changeUserAttendees(scope.row)">Edit
+                  </el-button>
+                </div>
+                <div v-else>
+                  <span>No privilege</span>
+                </div>
+              </template>
+            </el-table-column>
+
           </el-table>
         </div>
 
@@ -124,8 +147,59 @@
           </button>
         </div>
 
+        <div class="modal fade" id="editAttendeesModal"
+             data-backdrop="static"
+             data-keyboard="false"
+             tabindex="-1"
+             aria-labelledby="editAttendeesLabel"
+             aria-hidden="true">
+          <div class="modal-dialog  modal-dialog-centered">
+
+            <div class="modal-content">
+
+              <div class="modal-header  mb-2">
+                <h5 class="modal-title">Control attendance</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+
+
+              <div class="modal-body mb-2">
+
+
+                <el-row :gutter="20">
+                  <el-col :span="12" :offset="6">
+                    <div>
+                      <el-select v-model="valueOption" placeholder="Option A Status">
+                        <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                      </el-select>
+                    </div>
+                  </el-col>
+                </el-row>
+
+
+              </div>
+
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" @click="editAttendees">Edit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
       </div>
     </div>
+
+
   </div>
 
 </template>
@@ -173,7 +247,25 @@ export default {
       },
       loading: true,
       similarEvents: [],
-      eventAttendees: {}
+      eventAttendees: {},
+
+
+      valueOption: '',// todo check if a person accepted can change the status or not
+      userOption: {},
+      options: [{
+        value: 1,
+        label: 'accepted',
+        disabled: true
+      }, {
+        value: 3,
+        label: 'rejected',
+        disabled: true
+      }],
+      // {
+      //   value: 2,
+      //       label: 'pending',
+      //     disabled: true
+      // },
     }
   },
   mounted() {
@@ -249,11 +341,13 @@ export default {
       let tableItem = {};
       users.forEach((user) => {
         this.eventAttendees[user.attendeeId] = user.status;
+        tableItem.userId = user.attendeeId;
         tableItem.image = this.$api.getUserImage(user.attendeeId);
         tableItem.firstName = user.firstName;
         tableItem.lastName = user.lastName;
         tableItem.role = this.event.organizerId === user.attendeeId ? 'organizer' : 'attendee';
         tableItem.status = user.status;
+        tableItem.dateOfInterest = user.dateOfInterest;
         this.tableData.push(tableItem);
         tableItem = {};
       })
@@ -316,7 +410,6 @@ export default {
       }
 
       if (this.availableSeat === 'None') {
-        console.log(this.availableSeat, 11111111111);
 
         this.makeNotify('Warning', 'Events already in their full capacity', 'warning');
         return false
@@ -372,6 +465,23 @@ export default {
     reload: function () {
       this.$router.go(0);
       this.initEventProfile();
+    },
+    changeUserAttendees(user) {
+      this.userOption = user;
+      window.$('#editAttendeesModal').modal('show');
+    },
+    editAttendees() {
+      let status = {
+        status: this.valueOption
+      }
+      this.$api.updateEventAttendees(this.eventId, this.userOption.userId, status, this.$currentUser.getToken())
+          .then(() => {
+            this.initEventProfile();
+            this.makeNotify('Control attendance', 'successful', 'success')
+          })
+          .catch((error) => {
+            this.makeNotify('Control attendance', error.message, 'warning')
+          })
     }
   },
   computed: {
@@ -385,7 +495,11 @@ export default {
     },
     checkAttendeeUser() {
       return Object.keys(this.eventAttendees).includes(this.$currentUser.getUserId());
+    },
+    checkRole() {
+      return this.$currentUser.checkLoginUser(this.event.organizerId);
     }
+
   },
   // watch: {
   //   $route() {
