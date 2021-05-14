@@ -28,8 +28,9 @@
             <h4> {{ event.title }} </h4>
             <hr/>
             <h5 class="mt-0 mb-1"><i class="el-icon-date"/> Date: {{ event.date }}</h5>
-            <h5 class="mt-0 mb-1"><i class="el-icon-user"/> Capacity: {{ event.capacity }}</h5>
-            <h5 class="mt-0 mb-1"><i class="el-icon-ship"/> Attendees: {{ event.attendeeCount }}</h5>
+            <h5 class="mt-0 mb-1"><i class="el-icon-user"/> Capacity: {{ event.capacity || 'No limit' }}</h5>
+            <h5 class="mt-0 mb-1"><i class="el-icon-ship"/> Attendees: {{ event.attendeeCount }}
+              (Available:{{ availableSeat }})</h5>
             <!-- only accepted-->
             <h5 class="mt-0 mb-1" v-show="event.url && event.url.length"><i class="el-icon-loading"/> Url:
               {{ event.url }}</h5>
@@ -38,6 +39,7 @@
           </div>
 
         </div>
+
         <div class="px-4 py-3">
           <h5 class="mb-0"><i class="el-icon-receiving"/>Categories</h5>
           <div class="p-4 rounded shadow-sm bg-light">
@@ -55,15 +57,17 @@
         <div class="py-4 px-4">
           <div class="d-flex align-items-center justify-content-between mb-3">
             <h5 class="mb-0"><i class="el-icon-mobile-phone"/>Attendees</h5>
+            <el-button v-show="checkAttendeeUser" type="danger" @click="cancelAttendee" plain>
+              Cancel Attendees
+            </el-button>
           </div>
 
           <el-table
-            :data="tableData"
-            style="width: 100%"
-            :default-sort="{prop: 'firstName', order: 'descending'}"
-            max-height="250"
-          ><!--descending-->
-            <el-table-column min-width="50" prop="image" label="Image">
+              :data="tableData"
+              style="width: 100%"
+              :default-sort="{prop: 'firstName', order: 'descending'}"
+              max-height="250"><!--descending-->
+            <el-table-column min-width="50" prop="image" label="Image" width="150">
               <template v-slot="scope">
                 <img class="rounded" :src="scope.row.image" width="50" height="50" alt="user"
                      @error="setUserImageDefault"/>
@@ -74,15 +78,24 @@
               </template>
             </el-table-column>
             <el-table-column
-              prop="firstName"
-              label="First Name"
-              sortable
-              width="250"/>
+                prop="firstName"
+                label="First Name"
+                sortable
+                width="150"/>
             <el-table-column
-              prop="lastName"
-              label="Last Name"
-              sortable
-              width="250"/>
+                prop="lastName"
+                label="Last Name"
+                sortable
+                width="150"/>
+            <el-table-column
+                prop="role"
+                label="Role"
+                sortable
+                width="150"/>
+            <el-table-column
+                prop="status"
+                label="Status"
+                width="150"/>
           </el-table>
         </div>
 
@@ -97,11 +110,18 @@
 
             <el-carousel indicator-position="outside">
               <el-carousel-item v-for="eventId in similarEvents" v-bind:key="eventId">
-                <event-card :event-id="eventId"  /><!-- @click="reload" -->
+                <event-card :event-id="eventId" @click="reload"/><!-- @click="reload" -->
               </el-carousel-item>
             </el-carousel>
           </div>
 
+        </div>
+
+
+        <div class="px-4 py-3">
+          <button type="button" class="btn btn-outline-success btn-lg btn-block" @click="joinEvent">
+            <i class="el-icon-plus"/>Join
+          </button>
         </div>
 
       </div>
@@ -113,7 +133,7 @@
 <script>
 
 import EventCard from "../components/EventCard";
-
+// import { ElMessageBox } from 'element-plus';
 export default {
   name: "event-profile",
   components: {EventCard},
@@ -137,7 +157,7 @@ export default {
         isOnline: false,
         url: "",
         venue: "",
-        requiresAttendanceControl: 0,
+        requiresAttendanceControl: true,
         fee: null
       },
       organizer: {
@@ -152,7 +172,8 @@ export default {
         userImageError: ''
       },
       loading: true,
-      similarEvents: []
+      similarEvents: [],
+      eventAttendees: {}
     }
   },
   mounted() {
@@ -171,6 +192,7 @@ export default {
       await this.$api.getEvent(this.eventId)
           .then((response) => {
             this.event = response.data;
+            this.event.attendeeCount = response.data.attendeeCount || 0; //todo the date set up
           })
           .then(() => {
             this.eventImage = this.$api.getEventImage(this.eventId);
@@ -223,11 +245,15 @@ export default {
     },
     setUpAttendeesTable: function (users) {
       this.tableData = [];
+      this.eventAttendees = {};
       let tableItem = {};
       users.forEach((user) => {
+        this.eventAttendees[user.attendeeId] = user.status;
         tableItem.image = this.$api.getUserImage(user.attendeeId);
         tableItem.firstName = user.firstName;
         tableItem.lastName = user.lastName;
+        tableItem.role = this.event.organizerId === user.attendeeId ? 'organizer' : 'attendee';
+        tableItem.status = user.status;
         this.tableData.push(tableItem);
         tableItem = {};
       })
@@ -253,16 +279,120 @@ export default {
         }
       }
     },
-    // reload: function () {
-    //   // this.$router.go(0);
-    // }
-  },
-  watch: {
-    $route() {
+    joinEvent: function () {
+      if (this.checkJoinEventAvailable()) {
+
+        this.$api.createEventAttendees(this.eventId, this.$currentUser.getToken())
+            .then(() => {
+              this.initEventProfile();//todo check the table is refresh
+            })
+            .catch((error) => {
+              this.makeNotify('Cancel Attendees', error.message, 'warning');
+            })
+      }
+    },
+    cancelAttendee: function () {
+      if (!this.checkEventDateInFuture()) {
+        this.makeNotify('Warning', 'The Event has already happened', 'warning');
+      } else if (this.eventAttendees[this.$currentUser.getUserId()] === 'rejected') {
+        this.makeNotify('Warning', 'You cannot cancel, You have been rejected', 'warning');
+
+      } else {
+        this.$api.deleteEventAttendees(this.eventId, this.$currentUser.getToken())
+            .then(() => {
+              this.initEventProfile();//todo check the table is refresh
+            })
+            .catch((error) => {
+
+              this.makeNotify('Join A Event', error.message, 'warning');
+            })
+      }
+    },
+
+    checkJoinEventAvailable() {
+
+      if (!this.checkLogin()) {
+        return false;
+      }
+
+      if (this.availableSeat === 'None') {
+        console.log(this.availableSeat, 11111111111);
+
+        this.makeNotify('Warning', 'Events already in their full capacity', 'warning');
+        return false
+      }
+
+      if (this.checkAttendeeUser) {
+        this.makeNotify('Warning', 'You already in Event Attendees', 'warning');
+        return false
+      }
+
+      if (!this.checkEventDateInFuture()) {
+        this.makeNotify('Warning', 'The Event has already happened', 'warning');
+        return false
+      }
+
+      return true;
+
+    },
+    checkEventDateInFuture() {
+      let now = new Date();
+      return now < Date.parse(this.event.date);
+    },
+    checkLogin: function () {
+      if (!this.$currentUser.checkLogin()) {
+        this.$confirm('If You Do Not Have account Please register', 'Please Login', {
+          confirmButtonText: 'Login',
+          cancelButtonText: 'Register',
+          center: true
+        }).then(() => {
+          this.goToLoginPage();
+        }).catch(() => {
+          this.goToRegisterPage();
+        });
+        return false;
+      }
+      return true;
+    },
+
+    makeNotify(title, message, type) {
+      this.$notify({
+        title: title,
+        message: message,
+        type: type
+      });
+    },
+    goToLoginPage: function () {
+      this.$router.push({name: 'login'});
+      // this.reload();
+    },
+    goToRegisterPage: function () {
+      this.$router.push({name: 'register'});
+    },
+    reload: function () {
       this.$router.go(0);
       this.initEventProfile();
     }
-  }
+  },
+  computed: {
+    availableSeat() {
+      if (this.event.capacity === null) {
+        return 999;
+      }
+      let emptySeat = parseInt(this.event.capacity) - parseInt(this.event.attendeeCount);
+      return emptySeat > 0 ? emptySeat : 'None';
+
+    },
+    checkAttendeeUser() {
+      return Object.keys(this.eventAttendees).includes(this.$currentUser.getUserId());
+    }
+  },
+  // watch: {
+  //   $route() {
+  //     this.$router.go(0);
+  //     this.initEventProfile();
+  //   }
+  // }
 }
 </script>
 

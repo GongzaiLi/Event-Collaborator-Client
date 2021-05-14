@@ -1,7 +1,7 @@
 <template>
 
   <div class="row py-5 px-4"> <!--todo need fix flash and not find card--->
-    <div class="col-md-7 mx-auto">
+    <div class="col-md-6 mx-auto">
       <div class="bg-white shadow rounded overflow-hidden">
 
 
@@ -290,7 +290,6 @@ export default {
       this.eventModal = false;
       window.$('#editUserModal').modal('show');//
     },
-
   }
 }
 </script>

@@ -32,7 +32,7 @@
           <div v-else>
 
             <!--v-show-->
-            <a class="dropdown-item" href="#" @click="loginOut">Login Out</a>
+            <a class="dropdown-item" href="#" @click="loginOut">Log Out</a>
             <!--todo if not login hide up-->
           </div>
         </div>
