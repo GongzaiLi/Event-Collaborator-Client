@@ -116,6 +116,12 @@ export default {
     }
   },
   data() {
+    let checkDate = (rule, date, callback) => {
+      let now = new Date();
+      if (date < now) {
+        callback(new Error('The New Event Data must be in the future'));
+      }
+    };
     return {
       eventId: 0,
       newEvent: {
@@ -130,6 +136,7 @@ export default {
         requiresAttendanceControl: true,
         fee: 0
       },
+
       rules: {
         title: [
           {required: true, message: 'Please input Title', trigger: 'blur'},
@@ -139,7 +146,9 @@ export default {
           {required: false, message: 'Please select Activity zone', trigger: 'change'}
         ],
         date: [
-          {type: 'date', required: true, message: 'Please pick a date', trigger: 'change'}
+          {required: true, message: 'Please pick a date', trigger: 'change'},
+          {type: 'date', message: 'The date must in the future', trigger: 'blur'},
+          {validator: checkDate, trigger: 'blur'}
         ],
         description: [
           {required: true, message: 'Please input Describe', trigger: 'blur'},
@@ -191,9 +200,9 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.$api.editEvent(this.eventId, this.newEvent, this.$currentUser.getToken())
-          .then(()=> {
-            //todo then put event image
-          })
+              .then(() => {
+                //todo then put event image
+              })
 
         } else {
 
