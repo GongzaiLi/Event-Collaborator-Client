@@ -11,11 +11,12 @@
           <div class="card-body">
             <div>
               <!--can change width and height-->
-              <img :src="imgUrl" class="img-thumbnail rounded mx-auto d-block" width="350" height="350" alt="userImage"
+              <img :src="image.imgUrl" class="img-thumbnail rounded mx-auto d-block" width="350" height="350"
+                   alt="userImage"
                    @error="setUserImageDefault">
               <input
-                  class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/GIF"
-                  @change="openImage($event)"
+                  class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/gif"
+                  @change="openImage($event)" ref="file"
                   style="margin-top: 0.5em"
               >
               <button class="btn btn-secondary btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
@@ -43,17 +44,17 @@
                        class="form-control"
                        v-model="userInfo.password"
                        :required="editPasswordRequired"
-                       v-bind:oninput="passwordOnInvalid"/>
+                       v-bind:oninput="passwordOnInvalid" autocomplete="on"/>
               </div>
               <div>
                 <div class="form-group" v-if="!editModal">
                   <b>Confirm Password</b>
-<!--                  <label for="password"></label>-->
+                  <!--                  <label for="password"></label>-->
                   <input type="password"
                          class="form-control"
                          v-model="confirmPassword"
                          required
-                         v-bind:oninput="confirmPasswordOnInvalid" id="password"/>
+                         v-bind:oninput="confirmPasswordOnInvalid" id="password" autocomplete="on"/>
                 </div>
                 <div class="form-group" v-else>
                   <b>New Password</b>
@@ -61,7 +62,7 @@
                          class="form-control"
                          v-model="userInfo.currentPassword"
                          :required="editPasswordRequired"
-                         v-bind:oninput="passwordOnInvalid"/>
+                         v-bind:oninput="passwordOnInvalid" autocomplete="on"/>
                 </div>
               </div>
               <div class="form-group">
@@ -129,9 +130,15 @@ export default {
         userId: 0,
         token: ""
       },
-      imgUrl: require('../assets/profile-default.png'),
-      imgBaseData: '',
-      defaultImage: require('../assets/profile-default.png'),
+      image: {
+        imgUrl: '',
+        imgBaseData: '',
+        defaultImage: require('../assets/profile-default.png'),
+        initImage() {
+          this.imgUrl = this.defaultImage;
+        },
+      },
+
       removeImage: false,
       editPasswordRequired: true,
     }
@@ -155,12 +162,21 @@ export default {
             editUser[key] = this.userInfo[key];
           }
         })
-        this.$api.editUser(this.userId, editUser, this.$currentUser.getToken())
-            .then(() => {
-              //todo show the edit user successful
-              //todo call image api if image had or delete
-              this.getUser(this.userId);
 
+        this.$api.editUser(this.$currentUser.getUserId(), editUser, this.$currentUser.getToken())
+            .then(() => {
+
+              //todo show the edit user successful
+              //todo check image api if image had or delete
+              //
+              // if (! this.addUserImage(this.$currentUser.getUserId())) {
+              //   this.editUserImage;
+              // }
+
+
+            })
+            .then(()=> {
+              this.getUser(this.userId);
             })
             .catch((error) => {
               alert(error.message);
@@ -186,16 +202,20 @@ export default {
                 "email": this.userInfo.email,
                 "password": this.userInfo.password
               }
+
               return this.$api.login(loginInf);
             })
             .then((response) => {
               //todo token set and go to user profile
+
               this.user = response.data;
               this.$currentUser.setToken(this.user);
+
+
               //todo the image
-              if (this.imgBaseData) {
-                this.$api.putUserImage(this.user.userId, this.imgBaseData);
-              }
+              this.addUserImage(this.user.userId);
+
+
             })
             .then(() => {
               this.goToUserPage();
@@ -205,6 +225,19 @@ export default {
               this.error = error.message;
             });
       }
+
+    },
+    addUserImage: async function (userId) {
+      if (!this.removeImage) {
+        await this.$api.putUserImage(userId, this.image, this.$currentUser.getToken())
+            .then(() => {
+              return true;
+            })
+            .catch((error) => {
+              console.log(error.message);
+            })
+      }
+      return false;
 
     },
 
@@ -221,17 +254,11 @@ export default {
     //todo update the function
     openImage: async function (event) {
       if (event.target.files[0]) {
-        this.imgUrl = window.URL.createObjectURL(event.target.files[0]);
+        this.image.imgUrl = window.URL.createObjectURL(event.target.files[0]);
         this.removeImage = false;
 
-        let reader = new FileReader();
-        reader.onload = (event) => {
-          this.imgBaseData = event.target.result;
-          //e.target.result  就是从本地读取的图片的base64格式,将它上传给服务器即可
-          //使用axios的post方法上传即可
-        }
-        reader.readAsDataURL(event.target.files[0]);
-        // console.log(event.target.value);
+        this.image.imgBaseData = this.$refs.file.files[0];
+
         event.target.value = '';//todo can take the the name of the file
       }
 
@@ -241,7 +268,7 @@ export default {
       this.$router.push({name: 'user-profile', params: {userId: this.user.userId}});
     },
     removePhoto: function () {
-      this.imgUrl = this.defaultImage;
+      this.image.initImage();
       this.removeImage = true;
     },
     checkPasswordEdit: function () {
@@ -257,7 +284,7 @@ export default {
       this.userInfo.lastName = user.lastName;
       this.userInfo.email = user.email;
       this.editPasswordRequired = false;
-      this.imgUrl = this.editUserImage;
+      this.image.imgUrl = this.editUserImage;
 
     }
   },

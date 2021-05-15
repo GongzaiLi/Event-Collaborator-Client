@@ -15,7 +15,7 @@
                 </div>
                 <div class="form-group">
                   <label>Password:</label><br>
-                  <input type="password" class="form-control" required v-model="loginInf.password"/>
+                  <input type="password" class="form-control" required v-model="loginInf.password" autocomplete="on"/>
                 </div>
                 <div class="text-right col-md-0">
                   <router-link :to="{name: 'register'}">Register here</router-link>

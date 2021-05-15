@@ -21,7 +21,13 @@ export default {
         return `${SERVER_URL}users/${userId}/image`;
     },
 
-    putUserImage: (userId, userImage, token) => instance.put(`users/${userId}/image`, userImage, {headers: {'X-Authorization': token}}),
+    putUserImage: (userId, userImage, token) => instance.put(`users/${userId}/image`, userImage.imgBaseData, {
+        headers: {
+            'X-Authorization': token,
+            'Content-Type': userImage.imgBaseData.type
+        }
+    }),
+
     deleteUserImage: (userId, token) => instance.delete(`users/${userId}/image`, {headers: {'X-Authorization': token}}),
 
     //event
