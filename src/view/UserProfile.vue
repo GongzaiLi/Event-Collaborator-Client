@@ -30,12 +30,12 @@
           <h5 class="mb-0">Participating event</h5>
           <div class="p-4 rounded shadow-sm bg-light">
             <el-table
-              :data="tableData"
-              stripe
-              style="width: 100%"
-              :default-sort="{prop: 'eventId', order: 'increasing'}"
-              max-height="500"
-              @row-click="goToEventProfile"
+                :data="tableData"
+                stripe
+                style="width: 100%"
+                :default-sort="{prop: 'eventId', order: 'increasing'}"
+                max-height="500"
+                @row-click="goToEventProfile"
             >
               <el-table-column min-width="50" prop="image" label="Image" width="100">
                 <template v-slot="scope">
@@ -44,53 +44,53 @@
                 </template>
               </el-table-column>
               <el-table-column
-                prop="eventId"
-                label="Id"
-                sortable
-                width="80"/>
+                  prop="eventId"
+                  label="Id"
+                  sortable
+                  width="80"/>
               <el-table-column
-                prop="title"
-                label="Title"
-                sortable
-                width="150"/>
+                  prop="title"
+                  label="Title"
+                  sortable
+                  width="150"/>
               <el-table-column
-                prop="date"
-                label="Date"
-                sortable
-                width="150"/>
+                  prop="date"
+                  label="Date"
+                  sortable
+                  width="150"/>
               <el-table-column
-                prop="role"
-                label="Role"
-                sortable
-                width="80"/>
+                  prop="role"
+                  label="Role"
+                  sortable
+                  width="80"/>
               <el-table-column
-                prop="status"
-                label="Status"
-                width="80"/>
+                  prop="status"
+                  label="Status"
+                  width="80"/>
 
               <el-table-column label="Action" width="200">
                 <template #default="scope">
 
                   <div v-if="scope.row.role === 'organizer'">
                     <el-button
-                      size="mini"
-                      type="success"
-                      @click.stop="eventEdit(scope.row)">Edit
+                        size="mini"
+                        type="success"
+                        @click.stop="eventEdit(scope.row)">Edit
                     </el-button>
 
                     <el-popconfirm
-                      confirmButtonText='Ok'
-                      cancelButtonText='Cancel'
-                      icon="el-icon-info"
-                      iconColor="red"
-                      title="DO YOU WANT TO EDIT THE EVENT？"
-                      @Confirm="eventDelete(scope.row)"
-                      @Cancel="()=>{}"
+                        confirmButtonText='Ok'
+                        cancelButtonText='Cancel'
+                        icon="el-icon-info"
+                        iconColor="red"
+                        title="DO YOU WANT TO EDIT THE EVENT？"
+                        @Confirm="eventDelete(scope.row)"
+                        @Cancel="()=>{}"
                     >
                       <template #reference>
                         <el-button
-                          size="mini"
-                          type="danger"
+                            size="mini"
+                            type="danger"
                         >Delete
                         </el-button><!-- @click="handleDelete(scope.$index, scope.row)"-->
 
@@ -121,11 +121,16 @@
 
               <div class="modal-body">
                 <div class="col-md-10" style="text-align: right; margin-top: 25px">
-                  <el-button type="danger" class="btn btn-outline-danger" data-dismiss="modal" circle icon="el-icon-close"/>
+                  <el-button type="danger" class="btn btn-outline-danger" data-dismiss="modal" circle
+                             icon="el-icon-close"/>
                 </div>
                 <event-create-and-edit v-if="eventModal" :edit-modal="true" :edit-event-info="editEventInfo"/>
-                <register-and-edit v-else :edit-modal="true" :edit-user-info="user"
-                                   :edit-user-image="userImage"/>
+                <register-and-edit v-else
+                                   :edit-modal="true"
+                                   :edit-user-info="user"
+                                   :edit-user-image="userImage"
+                                   :user-id="parseInt(userId)"
+                                   :reload-user-profile="setUpUserProfile"/>
 
               </div>
             </div>
@@ -181,24 +186,24 @@ export default {
     },
     getUser: function (userId) {
       this.$api.getUser(userId, this.$currentUser.getToken())
-        .then((response) => {
-          this.user = response.data;
-          this.userImage = this.$api.getUserImage(this.userId);
-          this.foundUser = true;
-        })
-        .catch((error) => {
-          //todo do not find show not fund card
-          this.foundUser = false;
-          console.log(error);
-          ///**
-          this.user = {
-            firstName: "aaaa",
-            lastName: "bbbb",
-            email: "a@a",
-          }
-          this.foundUser = true;
-          //**/
-        });
+          .then((response) => {
+            this.user = response.data;
+            this.userImage = this.$api.getUserImage(this.userId);
+            this.foundUser = true;
+          })
+          .catch((error) => {
+            //todo do not find show not fund card
+            this.foundUser = false;
+            console.log(error);
+            ///**
+            this.user = {
+              firstName: "aaaa",
+              lastName: "bbbb",
+              email: "a@a",
+            }
+            this.foundUser = true;
+            //**/
+          });
 
     },
     setUserImageDefault: function (e) {
@@ -207,43 +212,43 @@ export default {
     getEvents: async function () {
       this.tableData = [];
       await this.$api.getEvents('')
-        .then((response) => {
-          response.data.forEach(async (event) => {
-            await this.getEventsAttendees(event.eventId)
-            await this.$api.getEvent(event.eventId).then((response) => {
-              if (response.data.organizerId === parseInt(this.userId)) {
-                this.setUpTheTable(response.data, "accepted");
-              }
-            });
+          .then((response) => {
+            response.data.forEach(async (event) => {
+              await this.getEventsAttendees(event.eventId)
+              await this.$api.getEvent(event.eventId).then((response) => {
+                if (response.data.organizerId === parseInt(this.userId)) {
+                  this.setUpTheTable(response.data, "accepted");
+                }
+              });
+            })
           })
-        })
-        .catch((error) => {
-          //todo error
-          console.log(error);
-        })
+          .catch((error) => {
+            //todo error
+            console.log(error);
+          })
 
     },
     getEventsAttendees: async function (eventId) {
       await this.$api.getEventAttendees(eventId, this.$currentUser.getToken())
-        .then((response) => {
-          response.data.forEach(async (user) => {
-            if (user.attendeeId === parseInt(this.userId)) await this.getEvent(eventId, user.status);
+          .then((response) => {
+            response.data.forEach(async (user) => {
+              if (user.attendeeId === parseInt(this.userId)) await this.getEvent(eventId, user.status);
+            })
           })
-        })
-        .catch((error) => {
-          console.log(error);
-        })
+          .catch((error) => {
+            console.log(error);
+          })
 
 
     },
     getEvent: async function (eventId, status) {
       await this.$api.getEvent(eventId)
-        .then((response) => {
-          this.setUpTheTable(response.data, status)
-        })
-        .catch((error) => {
-          console.log(error);
-        })
+          .then((response) => {
+            this.setUpTheTable(response.data, status)
+          })
+          .catch((error) => {
+            console.log(error);
+          })
     },
     setUpTheTable: function (event, status) {
       //todo can keep many data.. keep all event data in the table data.
@@ -265,12 +270,12 @@ export default {
     },
     eventDelete(row) {
       this.$api.deleteEvent(row.eventId, this.$currentUser.getToken())
-        .then(() => {
-          this.setUpUserProfile();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+          .then(() => {
+            this.setUpUserProfile();
+          })
+          .catch((error) => {
+            console.log(error);
+          });
     },
     goToEventProfile: function (event) {
       this.$router.push({name: 'event-profile', params: {eventId: event.eventId}});

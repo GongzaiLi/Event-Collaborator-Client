@@ -70,7 +70,7 @@ export default {
 
     //todo api may problem and token keep.
     login: async function () {
-      //k@gmail.com abc123  a@gmail.com abc234
+      //+ abc123  a@gmail.com abc234
       if (this.validateLogin()) {
         //console.log(this.loginInf);
         await this.$api.login(this.loginInf)

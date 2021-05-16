@@ -45,6 +45,7 @@ export default {
         return `${SERVER_URL}events/${eventId}/image`;
     },
 
+    //todo the image need
     putEventImage: (eventId, eventImage, token) => instance.put(`events/${eventId}/image`, eventImage, {headers: {'X-Authorization': token}}),
 
     //events.attendees

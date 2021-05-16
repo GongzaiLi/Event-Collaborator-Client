@@ -93,8 +93,6 @@
 </template>
 
 <script>
-// import Api from '../api';
-// import {onUpdated} from 'vue';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -110,8 +108,14 @@ export default {
       default: () => ({}),
     },
     editUserImage: {
-      type: String//Image
+      type: String
     },
+    userId: {
+      type: Number,
+    },
+    reloadUserProfile: {
+      type: Function,
+    }
   },
   data() {
     return {
@@ -138,50 +142,46 @@ export default {
           this.imgUrl = this.defaultImage;
         },
       },
-
       hasImage: false,
       editPasswordRequired: true,
+      editImage: false,
     }
   },
   mounted() {
     if (this.editModal) {
-      // setTimeout(() => {
-      //   this.editUserSetUp(this.editUser);
-      // }, 100);
       this.editUserSetUp(this.editUserInfo);
-
     }
 
   },
   methods: {
     editUser: function () {
-      if (this.validateRegister()) {
-        //todo should update
-        const editUser = {};
-        Object.keys(this.userInfo).forEach((key) => {
-          if (this.userInfo[key].length) {
-            editUser[key] = this.userInfo[key];
-          }
-        })
 
-        this.$api.editUser(this.$currentUser.getUserId(), editUser, this.$currentUser.getToken())
-            .then(() => {
+      //todo should update
+      const editUser = {};
+      Object.keys(this.userInfo).forEach((key) => {
+        if (this.userInfo[key].length) {
+          editUser[key] = this.userInfo[key];
+        }
+      })
 
-              //todo show the edit user successful
-              //todo check image api if image had or delete
-              //
-              // if (! this.addUserImage(this.$currentUser.getUserId())) {
-              //   this.editUserImage;
-              // }
-            })
-            .then(()=> {
-              this.getUser(this.userId);
-            })
-            .catch((error) => {
-              alert(error.message);
-            })
-        window.$('#editUserModal').modal('hide');//
-      }
+      this.$api.editUser(this.$currentUser.getUserId(), editUser, this.$currentUser.getToken())
+          .then(() => {
+            //todo show the edit user successful
+            //todo check image api if image had or delete
+
+            this.addUserImage(this.userId);
+
+          })
+          .then(() => {
+            // this.$router.go(0);
+            this.reloadUserProfile();
+          })
+          .catch((error) => {
+            alert(error.message);
+          })
+      window.$('#editUserModal').modal('hide');//
+
+
     },
 
     register: async function () {
@@ -201,7 +201,6 @@ export default {
                 "email": this.userInfo.email,
                 "password": this.userInfo.password
               }
-
               return this.$api.login(loginInf);
             })
             .then((response) => {
@@ -210,10 +209,8 @@ export default {
               this.user = response.data;
               this.$currentUser.setToken(this.user);
 
-
               //todo the image
               this.addUserImage(this.user.userId);
-
 
             })
             .then(() => {
@@ -227,8 +224,16 @@ export default {
 
     },
     addUserImage: async function (userId) {
-      if (this.hasImage) {
+      if (this.hasImage && this.editImage) {
         await this.$api.putUserImage(userId, this.image, this.$currentUser.getToken())
+            .then(() => {
+              return true;
+            })
+            .catch((error) => {
+              console.log(error.message);
+            })
+      } else if (this.editModal && !this.hasImage) {
+        await this.$api.deleteUserImage(userId, this.$currentUser.getToken())
             .then(() => {
               return true;
             })
@@ -237,7 +242,6 @@ export default {
             })
       }
       return false;
-
     },
 
     /**
@@ -255,6 +259,8 @@ export default {
       if (event.target.files[0]) {
         this.image.imgUrl = window.URL.createObjectURL(event.target.files[0]);
         this.hasImage = true;
+        this.editImage = true;
+
         this.image.imgBaseData = this.$refs.file.files[0];
         event.target.value = '';//todo can take the the name of the file
       }
@@ -267,6 +273,7 @@ export default {
     removePhoto: function () {
       this.image.initImage();
       this.hasImage = false;
+      this.editImage = false;
     },
     checkPasswordEdit: function () {
       if (this.editModal) {
@@ -281,12 +288,9 @@ export default {
       this.userInfo.lastName = user.lastName;
       this.userInfo.email = user.email;
       this.editPasswordRequired = false;
-      // todo need check the editUserImage is null or not
-      if (this.editUserImage !== null) this.hasImage = true;
+      this.hasImage = true;
+      this.editImage = false;
       this.image.imgUrl = this.editUserImage;
-      //--------------------------------------------------
-
-
     }
   },
 
