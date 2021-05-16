@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const SERVER_URL = "http://csse-s365docker1.canterbury.ac.nz:4001/api/v1/";
+const SERVER_URL = "http://localhost:4941/api/v1/";
 //http://localhost:4941/api/v1/ //http://csse-s365docker1.canterbury.ac.nz:4001/api/v1/
 const instance = axios.create({
     baseURL: SERVER_URL,

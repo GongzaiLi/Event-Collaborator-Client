@@ -139,7 +139,7 @@ export default {
         },
       },
 
-      removeImage: false,
+      hasImage: false,
       editPasswordRequired: true,
     }
   },
@@ -149,6 +149,7 @@ export default {
       //   this.editUserSetUp(this.editUser);
       // }, 100);
       this.editUserSetUp(this.editUserInfo);
+
     }
 
   },
@@ -172,8 +173,6 @@ export default {
               // if (! this.addUserImage(this.$currentUser.getUserId())) {
               //   this.editUserImage;
               // }
-
-
             })
             .then(()=> {
               this.getUser(this.userId);
@@ -228,7 +227,7 @@ export default {
 
     },
     addUserImage: async function (userId) {
-      if (!this.removeImage) {
+      if (this.hasImage) {
         await this.$api.putUserImage(userId, this.image, this.$currentUser.getToken())
             .then(() => {
               return true;
@@ -255,10 +254,8 @@ export default {
     openImage: async function (event) {
       if (event.target.files[0]) {
         this.image.imgUrl = window.URL.createObjectURL(event.target.files[0]);
-        this.removeImage = false;
-
+        this.hasImage = true;
         this.image.imgBaseData = this.$refs.file.files[0];
-
         event.target.value = '';//todo can take the the name of the file
       }
 
@@ -269,7 +266,7 @@ export default {
     },
     removePhoto: function () {
       this.image.initImage();
-      this.removeImage = true;
+      this.hasImage = false;
     },
     checkPasswordEdit: function () {
       if (this.editModal) {
@@ -284,7 +281,11 @@ export default {
       this.userInfo.lastName = user.lastName;
       this.userInfo.email = user.email;
       this.editPasswordRequired = false;
+      // todo need check the editUserImage is null or not
+      if (this.editUserImage !== null) this.hasImage = true;
       this.image.imgUrl = this.editUserImage;
+      //--------------------------------------------------
+
 
     }
   },
@@ -304,11 +305,11 @@ export default {
     }
   },
 
-  watch: {
-    editUser(user) {
-      this.editUserSetUp(user);
-    }
-  }
+  // watch: {
+  //   editUser(user) {
+  //     this.editUserSetUp(user);
+  //   }
+  // }
 
 
 }
