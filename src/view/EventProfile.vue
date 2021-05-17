@@ -87,6 +87,7 @@
                 label="Last Name"
                 sortable
                 width="150"/>
+            <div v-if="checkRole">
             <el-table-column
                 prop="role"
                 label="Role"
@@ -118,6 +119,8 @@
                 </div>
               </template>
             </el-table-column>
+
+            </div>
 
           </el-table>
         </div>

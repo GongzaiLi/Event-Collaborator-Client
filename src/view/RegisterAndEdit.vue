@@ -27,7 +27,7 @@
 
           <div class="card-body">
 
-            <form @submit="action">
+            <form @submit.prevent="action">
 
               <div class="form-group">
                 <b>First name</b>
@@ -175,7 +175,9 @@ export default {
     action: function () {
       if (this.editModal) {
         this.editUser();
+
       } else {
+
         this.register();
       }
     },
@@ -195,6 +197,7 @@ export default {
      * register a new user
      **/
     register: async function () {
+
       if (this.validateRegister()) {
 
         await this.$api.register({
@@ -205,6 +208,7 @@ export default {
         })
             .then((response) => {
               this.user = response.data;
+
               return this.$api.login({"email": this.userInfo.email, "password": this.userInfo.password});
             })
             .then((response) => {
