@@ -6,12 +6,15 @@
         <div class="row justify-content-center align-items-center">
           <div class="col-md-6">
             <div class="col-md-0">
+
               <h3 class="text-center">LOGIN</h3>
+
               <br>
-              <form @submit.prevent><!-- if use required need form -->
+
+              <form @submit.prevent>
                 <div class="form-group">
                   <label>email:</label><br>
-                  <input type="email" class="form-control" required v-model="loginInf.email" /><!--tabindex="0" id-->
+                  <input type="email" class="form-control" required v-model="loginInf.email" />
                 </div>
                 <div class="form-group">
                   <label>Password:</label><br>
@@ -19,13 +22,6 @@
                 </div>
                 <div class="text-right col-md-0">
                   <router-link :to="{name: 'register'}">Register here</router-link>
-                </div>
-                <div v-if="error.length" class="alert alert-danger alert-dismissible fade show" role="alert"
-                     style="margin-top: 0.2em">
-                  {{ error }}
-                  <!--                  <button type="button" class="close" v-bind:data-dismiss="alert" aria-label="Close">-->
-                  <!--                    <span aria-hidden="true">&times;</span>-->
-                  <!--                  </button>-->
                 </div>
                 <div style="margin-top: 0.7em">
                   <button type="submit" class="btn btn-secondary btn-block" v-on:click="login">Login</button>
@@ -50,8 +46,7 @@
 </style>
 
 <script>
-// import Api from '../api';
-
+//done
 export default {
   data() {
     return {
@@ -59,7 +54,6 @@ export default {
         "email": '',
         "password": '',
       },
-      error: "",
       user: {
         userId: 0,
         token: ""
@@ -67,22 +61,20 @@ export default {
     }
   },
   methods: {
-
-    //todo api may problem and token keep.
+    /**
+     * login api
+     **/
     login: async function () {
-      //+ abc123  a@gmail.com abc234
       if (this.validateLogin()) {
-        //console.log(this.loginInf);
         await this.$api.login(this.loginInf)
             .then((response) => {//IIFE
               this.user = response.data;
               this.$currentUser.setToken(this.user);// set the token in the local
             }).then(() => {
-              //EventBus.$emit('login');
               this.goToUserPage();
             })
-            .catch(() => {
-              this.error = "invalid email or password";
+            .catch((error) => {
+              this.makeNotify('Register a New User', error.response.statusText, 'error');
             });
       }
     },
@@ -92,10 +84,25 @@ export default {
     validateLogin: function () {
       return this.loginInf.password && this.loginInf.email;
     },
+    /**
+     * when login successful go to the user profile
+     */
     goToUserPage: function () {
       this.$router.push({name: 'user-profile', params: {userId: this.user.userId}});
     },
-
+    /**
+     * make error notify
+     * @param title
+     * @param message
+     * @param type
+     */
+    makeNotify(title, message, type) {
+      this.$notify({
+        title: title,
+        message: message,
+        type: type
+      });
+    },
   }
 
 }
