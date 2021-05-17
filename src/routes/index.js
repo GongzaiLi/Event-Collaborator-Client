@@ -24,13 +24,15 @@ const router = createRouter({
     history: createWebHistory()
 });
 
+
 router.beforeEach((to, from, next) => {
-    if (to.name !== 'login' && to.name !== 'register' && !auth.checkLogin()) {
+    if (to.name !== 'register' && to.name !== 'event-search' && to.name !== 'login' && !auth.checkLogin()) {
         next({name: 'login'})
-    } else if (auth.checkLogin() || to.name === 'login') {
+    } else if (to.name === 'login' && auth.checkLogin()) {
         next({name: 'user-profile', params: {userId: auth.getUserId()}})
-    } else next()
+    } else {
+        next()
+    }
 })
 
 export default router;
-//todo 守卫
