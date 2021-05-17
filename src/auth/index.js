@@ -19,6 +19,10 @@ export default {
         return sessionStorage.getItem('userId') !== null;
     },
     checkLoginUser: function (userId) {
-        return sessionStorage.getItem('userId') === userId.toString();
+        if (userId) {
+            return sessionStorage.getItem('userId') === userId.toString();
+        }
+        return false;
+
     }
 }

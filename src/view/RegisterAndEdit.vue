@@ -27,7 +27,7 @@
 
           <div class="card-body">
 
-            <form @submit.prevent>
+            <form @submit="action">
 
               <div class="form-group">
                 <b>First name</b>
@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="form-group" v-else>
-                  <b>New Password</b>
+                  <b>Current Password</b>
                   <input
                       type="password"
                       class="form-control"
@@ -84,11 +84,11 @@
 
               <div class="form-group">
 
-                <button v-if="!editModal" type="submit" class="btn btn-secondary btn-block" v-on:click="register">
+                <button v-if="!editModal" type="submit" class="btn btn-secondary btn-block">
                   Register
                 </button>
 
-                <button v-if="editModal" type="submit" class="btn btn-secondary btn-block" v-on:click="editUser">
+                <button v-if="editModal" type="submit" class="btn btn-secondary btn-block">
                   Edit
                 </button>
 
@@ -172,6 +172,13 @@ export default {
     }
   },
   methods: {
+    action: function () {
+      if (this.editModal) {
+        this.editUser();
+      } else {
+        this.register();
+      }
+    },
 
     /**
      * validate register date
@@ -202,7 +209,7 @@ export default {
             })
             .then((response) => {
               this.$currentUser.setToken(response.data);
-              this.addUserImage(this.user.userId);
+              this.changeUserImage(this.user.userId);
               this.goToUserPage();
             })
             .catch((error) => {
@@ -210,15 +217,15 @@ export default {
             });
       }
     },
-    //todo-------------------------------------------------------------------------------------
-    addUserImage: async function (userId) {
+
+    changeUserImage: async function (userId) {
       if (this.hasImage && this.editImage) {
         await this.$api.putUserImage(userId, this.image, this.$currentUser.getToken())
             .then(() => {
               return true;
             })
             .catch((error) => {
-              console.log(error.message);
+              this.makeNotify('add or edit User Image', error.response.statusText, 'error');
             })
       } else if (this.editModal && !this.hasImage) {
         await this.$api.deleteUserImage(userId, this.$currentUser.getToken())
@@ -226,7 +233,7 @@ export default {
               return true;
             })
             .catch((error) => {
-              console.log(error.message);
+              this.makeNotify('Delete User Image', error.response.statusText, 'error');
             })
       }
       return false;
@@ -234,7 +241,6 @@ export default {
 
     editUser: function () {
 
-      //todo should update
       const editUser = {};
       Object.keys(this.userInfo).forEach((key) => {
         if (this.userInfo[key].length) {
@@ -244,29 +250,28 @@ export default {
 
       this.$api.editUser(this.$currentUser.getUserId(), editUser, this.$currentUser.getToken())
           .then(() => {
-            //todo show the edit user successful
-            //todo check image api if image had or delete
-
-            this.addUserImage(this.userId);
-
+            this.changeUserImage(this.userId);
           })
           .then(() => {
-            // this.$router.go(0);
+            this.$router.go(0);
             this.reloadUserProfile();
+            this.cleanUserInfo();
+            // this.makeNotify('Edit your info', "Successful edit", 'success');
+
           })
           .catch((error) => {
-            alert(error.message);
+            this.cleanUserInfo();
+            this.makeNotify('Edit A User', error.response.statusText, 'error');
+            //this.reloadUserProfile();
           })
       window.$('#editUserModal').modal('hide');//
-
-
+    },
+    cleanUserInfo: function () {
+      Object.keys(this.userInfo).forEach((key) => {
+        this.userInfo[key] = '';
+      })
     },
 
-
-
-
-
-    //todo update the function
     openImage: async function (event) {
       if (event.target.files[0]) {
         this.image.imgUrl = window.URL.createObjectURL(event.target.files[0]);
@@ -275,8 +280,6 @@ export default {
         this.image.imgBaseData = this.$refs.file.files[0];
         event.target.value = '';
       }
-
-
     },
     goToUserPage: function () {
       this.$router.push({name: 'user-profile', params: {userId: this.user.userId}});

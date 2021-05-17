@@ -74,7 +74,7 @@ export default {
               this.goToUserPage();
             })
             .catch((error) => {
-              this.makeNotify('Register a New User', error.response.statusText, 'error');
+              this.makeNotify('Login', error.response.statusText, 'error');
             });
       }
     },

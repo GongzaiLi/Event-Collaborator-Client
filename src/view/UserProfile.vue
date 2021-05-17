@@ -1,24 +1,24 @@
 <template>
 
-  <div class="row py-5 px-4"> <!--todo need fix flash and not find card--->
-    <div class="col-md-6 mx-auto">
+  <div class="row py-5 px-4" v-if="!loading">
+    <div class="col-md-6 mx-auto" v-if="foundUser">
       <div class="bg-white shadow rounded overflow-hidden">
-
 
         <div class="px-4 pt-0 pb-4 cover">
           <div class="media align-items-end profile-head">
             <div class="profile mr-3" style="margin-top: 0.7em">
+
               <img :src="userImage" alt="userImage" width="120" class="rounded mb-2 img-thumbnail"
                    @error="setUserImageDefault">
 
-              <button v-show="foundUser" class="btn btn-secondary btn-sm btn-block" @click="setUserModal">Edit
+              <button class="btn btn-secondary btn-sm btn-block" @click="setUserModal">Edit
                 profile
               </button>
 
             </div>
             <div class="media-body mb-5">
               <h4 class="mt-0 mb-0">{{ user.firstName }} {{ user.lastName }}</h4>
-              <p v-show="foundUser" class="mb-4"> <!--small-->
+              <p class="mb-4"> <!--small-->
                 {{ user.email }}
               </p>
             </div>
@@ -62,13 +62,13 @@
                   prop="role"
                   label="Role"
                   sortable
-                  width="80"/>
+                  width="100"/>
               <el-table-column
                   prop="status"
                   label="Status"
-                  width="80"/>
+                  width="100"/>
 
-              <el-table-column label="Action" width="200">
+              <el-table-column label="Action" width="150">
                 <template #default="scope">
 
                   <div v-if="scope.row.role === 'organizer'">
@@ -125,13 +125,13 @@
                              icon="el-icon-close"/>
                 </div>
                 <event-create-and-edit v-if="eventModal" :edit-modal="true" :edit-event-info="editEventInfo"/>
-                <register-and-edit v-else
-                                   :edit-modal="true"
-                                   :edit-user-info="user"
-                                   :edit-user-image="userImage"
-                                   :user-id="parseInt(userId)"
-                                   :reload-user-profile="setUpUserProfile"/>
-
+                <register-and-edit
+                    v-else
+                    :edit-modal="true"
+                    :edit-user-info="user"
+                    :edit-user-image="userImage"
+                    :user-id="parseInt(userId)"
+                    :reload-user-profile="setUpUserProfile"/>
               </div>
             </div>
           </div>
@@ -139,6 +139,12 @@
 
       </div>
     </div>
+
+    <div v-else style="width:800px; margin:0 auto;">
+      <el-result icon="info" title="Not Found">
+      </el-result>
+    </div>
+
   </div>
 
 </template>
@@ -146,7 +152,6 @@
 <script>
 import RegisterAndEdit from "./RegisterAndEdit";
 import EventCreateAndEdit from "./EventCreateAndEdit";
-
 
 export default {
   name: "UserProfile",
@@ -166,49 +171,54 @@ export default {
       userImage: '',
       tableData: [],
       eventModal: true,
-      editEventInfo: {}
+      editEventInfo: {},
+      loading: true
     }
   },
-  mounted() {//mounted
+  mounted() {
     this.setUpUserProfile();
   },
   methods: {
-    setUpUserProfile: function () {
+    /**
+     * init user profile page
+     **/
+    setUpUserProfile: async function () {
+      this.loading = true;
       this.userId = this.$route.params.userId;
       if (this.$currentUser.checkLoginUser(this.userId)) {
-        this.getUser(this.userId);
-        this.getEvents();
+        await this.getUser(this.userId);
+        await this.getEvents();
       } else {
-        //todo show not find and register or login
         this.foundUser = false;
+        this.loading = false;
       }
-
     },
-    getUser: function (userId) {
-      this.$api.getUser(userId, this.$currentUser.getToken())
+    /**
+     * get user detail
+     **/
+    getUser: async function (userId) {
+      await this.$api.getUser(userId, this.$currentUser.getToken())
           .then((response) => {
             this.user = response.data;
             this.userImage = this.$api.getUserImage(this.userId);
             this.foundUser = true;
+            this.loading = false;
           })
           .catch((error) => {
-            //todo do not find show not fund card
             this.foundUser = false;
-            console.log(error);
-            ///**
-            this.user = {
-              firstName: "aaaa",
-              lastName: "bbbb",
-              email: "a@a",
-            }
-            this.foundUser = true;
-            //**/
+            this.loading = false;
+            this.makeNotify('Get A User', error.response.statusText, 'error');
           });
-
     },
+    /**
+     * if image error set a default image
+     **/
     setUserImageDefault: function (e) {
       e.target.src = require('../assets/profile-default.png');
     },
+    /**
+     * call get event api
+     **/
     getEvents: async function () {
       this.tableData = [];
       await this.$api.getEvents('')
@@ -223,11 +233,12 @@ export default {
             })
           })
           .catch((error) => {
-            //todo error
-            console.log(error);
+            this.makeNotify('Get ALl Event', error.response.statusText, 'error');
           })
-
     },
+    /**
+     * call api get Event attendees
+     **/
     getEventsAttendees: async function (eventId) {
       await this.$api.getEventAttendees(eventId, this.$currentUser.getToken())
           .then((response) => {
@@ -236,22 +247,27 @@ export default {
             })
           })
           .catch((error) => {
-            console.log(error);
+            this.makeNotify('Get Event Attendees', error.response.statusText, 'error');
           })
 
 
     },
+    /**
+     * call api get a event
+     **/
     getEvent: async function (eventId, status) {
       await this.$api.getEvent(eventId)
           .then((response) => {
             this.setUpTheTable(response.data, status)
           })
           .catch((error) => {
-            console.log(error);
+            this.makeNotify('Get a Event', error.response.statusText, 'error');
           })
     },
+    /**
+     * set up the table
+     **/
     setUpTheTable: function (event, status) {
-      //todo can keep many data.. keep all event data in the table data.
       let tableItem = event;
       tableItem.image = this.$api.getEventImage(event.id);
       tableItem.eventId = event.id;
@@ -260,23 +276,29 @@ export default {
       tableItem.role = this.$currentUser.checkLoginUser(event.organizerId) ? 'organizer' : 'attendee';
       tableItem.status = status;
       if (!this.checkTableHadItem(tableItem.eventId)) this.tableData.push(tableItem);
-
     },
+    /**
+     * open the event edit modal.
+     **/
     eventEdit(row) {
-      console.log(row);
+      //todo check later
       this.editEventInfo = row;
       this.eventModal = true;
       window.$('#editUserModal').modal('show');//
     },
     eventDelete(row) {
+      //todo check later
       this.$api.deleteEvent(row.eventId, this.$currentUser.getToken())
           .then(() => {
             this.setUpUserProfile();
           })
           .catch((error) => {
-            console.log(error);
+            this.makeNotify('User Profile', error.response.statusText, 'error');
           });
     },
+    /**
+     * go to event Profile
+     * */
     goToEventProfile: function (event) {
       this.$router.push({name: 'event-profile', params: {eventId: event.eventId}});
     },
@@ -294,6 +316,24 @@ export default {
     setUserModal() {
       this.eventModal = false;
       window.$('#editUserModal').modal('show');//
+    },
+    /**
+     * make error notify
+     * @param title
+     * @param message
+     * @param type
+     */
+    makeNotify(title, message, type) {
+      this.$notify({
+        title: title,
+        message: message,
+        type: type
+      });
+    }
+  },
+  watch: {
+    $route() {
+      this.setUpUserProfile();
     },
   }
 }
