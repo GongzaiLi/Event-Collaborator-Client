@@ -1,16 +1,12 @@
 import { createApp } from 'vue';
-import { createWebHistory, createRouter } from 'vue-router';
 import ElementPlus from 'element-plus';
 import App from './App.vue';
-import routes from "./routes";
+import router from "./routes";
 import Auth from "./auth";
 import Api from "./api";
 
 
-const router = createRouter({
-    routes,
-    history: createWebHistory()
-});
+
 
 const app = createApp(App);
 
