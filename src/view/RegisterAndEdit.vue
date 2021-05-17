@@ -8,81 +8,101 @@
           <header v-show="!editModal" class="card-header">
             <h4 class="card-title mt-2">Sign up</h4>
           </header>
+
           <div class="card-body">
             <div>
-              <!--can change width and height-->
               <img :src="image.imgUrl" class="img-thumbnail rounded mx-auto d-block" width="350" height="350"
                    alt="userImage"
                    @error="setUserImageDefault">
               <input
-                  class="col-md-8 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/gif"
+                  class="col-md-9 py-2" type="file" id="imageInput" accept="image/png,image/jpeg,image/gif"
                   @change="openImage($event)" ref="file"
                   style="margin-top: 0.5em"
               >
-              <button class="btn btn-secondary btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
+              <button class="btn btn-outline-danger btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
             </div>
           </div>
+
           <hr>
 
           <div class="card-body">
+
             <form @submit.prevent>
+
               <div class="form-group">
                 <b>First name</b>
                 <input type="text" class="form-control" v-model="userInfo.firstName" required/>
               </div>
+
               <div class="form-group">
                 <b>Last name</b>
                 <input type="text" class="form-control" v-model="userInfo.lastName" required/>
               </div>
+
               <div class="form-group">
                 <b>Email</b>
                 <input type="email" class="form-control" v-model="userInfo.email" required/>
               </div>
+
               <div class="form-group">
                 <b>Password</b>
-                <input type="password"
-                       class="form-control"
-                       v-model="userInfo.password"
-                       :required="editPasswordRequired"
-                       v-bind:oninput="passwordOnInvalid" autocomplete="on"/>
+                <input
+                    type="password"
+                    class="form-control"
+                    v-model="userInfo.password"
+                    :required="editPasswordRequired"
+                    v-bind:oninput="passwordOnInvalid"
+                    autocomplete="on"/>
               </div>
+
               <div>
+
                 <div class="form-group" v-if="!editModal">
                   <b>Confirm Password</b>
-                  <!--                  <label for="password"></label>-->
-                  <input type="password"
-                         class="form-control"
-                         v-model="confirmPassword"
-                         required
-                         v-bind:oninput="confirmPasswordOnInvalid" id="password" autocomplete="on"/>
+                  <input
+                      type="password"
+                      class="form-control"
+                      v-model="confirmPassword"
+                      required
+                      v-bind:oninput="confirmPasswordOnInvalid"
+                      id="password"
+                      autocomplete="on"/>
                 </div>
+
                 <div class="form-group" v-else>
                   <b>New Password</b>
-                  <input type="password"
-                         class="form-control"
-                         v-model="userInfo.currentPassword"
-                         :required="editPasswordRequired"
-                         v-bind:oninput="passwordOnInvalid" autocomplete="on"/>
+                  <input
+                      type="password"
+                      class="form-control"
+                      v-model="userInfo.currentPassword"
+                      :required="editPasswordRequired"
+                      v-bind:oninput="passwordOnInvalid"
+                      autocomplete="on"/>
                 </div>
+
               </div>
+
               <div class="form-group">
+
                 <button v-if="!editModal" type="submit" class="btn btn-secondary btn-block" v-on:click="register">
                   Register
                 </button>
+
                 <button v-if="editModal" type="submit" class="btn btn-secondary btn-block" v-on:click="editUser">
                   Edit
                 </button>
+
               </div>
-              <div v-if="error.length" class="alert alert-danger alert-dismissible fade show" role="alert"
-                   style="margin-top: 0.2em">
-                {{ error }}
-              </div>
+
             </form>
+
           </div>
 
-          <footer v-show="!editModal" class="border-top card-body text-center">Have an account?
+          <footer v-show="!editModal" class="border-top card-body text-center">
+            Have an account?
             <router-link to="/login">Log In</router-link>
           </footer>
+
         </div>
       </div>
 
@@ -119,7 +139,7 @@ export default {
   },
   data() {
     return {
-      use: 'asd',
+
       userInfo: {
         firstName: '',
         lastName: '',
@@ -128,8 +148,7 @@ export default {
         currentPassword: ''
       },
       confirmPassword: '',
-      error: '',
-      //todo may be can delete
+
       user: {
         userId: 0,
         token: ""
@@ -151,9 +170,68 @@ export default {
     if (this.editModal) {
       this.editUserSetUp(this.editUserInfo);
     }
-
   },
   methods: {
+
+    /**
+     * validate register date
+     */
+    validateRegister: function () {
+      return this.userInfo.firstName.length &&
+          this.userInfo.lastName.length &&
+          this.userInfo.email.length &&
+          (this.userInfo.password.length >= MIN_PASSWORD_LENGTH) &&
+          (this.userInfo.password === this.confirmPassword);
+    },
+
+    /**
+     * register a new user
+     **/
+    register: async function () {
+      if (this.validateRegister()) {
+
+        await this.$api.register({
+          "firstName": this.userInfo.firstName,
+          "lastName": this.userInfo.lastName,
+          "email": this.userInfo.email,
+          "password": this.userInfo.password
+        })
+            .then((response) => {
+              this.user = response.data;
+              return this.$api.login({"email": this.userInfo.email, "password": this.userInfo.password});
+            })
+            .then((response) => {
+              this.$currentUser.setToken(response.data);
+              this.addUserImage(this.user.userId);
+              this.goToUserPage();
+            })
+            .catch((error) => {
+              this.makeNotify('Register a New User', error.response.statusText, 'error');
+            });
+      }
+    },
+    //todo-------------------------------------------------------------------------------------
+    addUserImage: async function (userId) {
+      if (this.hasImage && this.editImage) {
+        await this.$api.putUserImage(userId, this.image, this.$currentUser.getToken())
+            .then(() => {
+              return true;
+            })
+            .catch((error) => {
+              console.log(error.message);
+            })
+      } else if (this.editModal && !this.hasImage) {
+        await this.$api.deleteUserImage(userId, this.$currentUser.getToken())
+            .then(() => {
+              return true;
+            })
+            .catch((error) => {
+              console.log(error.message);
+            })
+      }
+      return false;
+    },
+
     editUser: function () {
 
       //todo should update
@@ -184,85 +262,18 @@ export default {
 
     },
 
-    register: async function () {
 
-      if (this.validateRegister()) {
-        let registerInf = {
-          "firstName": this.userInfo.firstName,
-          "lastName": this.userInfo.lastName,
-          "email": this.userInfo.email,
-          "password": this.userInfo.password
-        };
 
-        await this.$api.register(registerInf)
-            .then((response) => {
-              this.user = response.data
-              const loginInf = {
-                "email": this.userInfo.email,
-                "password": this.userInfo.password
-              }
-              return this.$api.login(loginInf);
-            })
-            .then((response) => {
-              //todo token set and go to user profile
 
-              this.user = response.data;
-              this.$currentUser.setToken(this.user);
 
-              //todo the image
-              this.addUserImage(this.user.userId);
-
-            })
-            .then(() => {
-              this.goToUserPage();
-            })
-            .catch((error) => {
-              console.log(this.error)
-              this.error = error.message;
-            });
-      }
-
-    },
-    addUserImage: async function (userId) {
-      if (this.hasImage && this.editImage) {
-        await this.$api.putUserImage(userId, this.image, this.$currentUser.getToken())
-            .then(() => {
-              return true;
-            })
-            .catch((error) => {
-              console.log(error.message);
-            })
-      } else if (this.editModal && !this.hasImage) {
-        await this.$api.deleteUserImage(userId, this.$currentUser.getToken())
-            .then(() => {
-              return true;
-            })
-            .catch((error) => {
-              console.log(error.message);
-            })
-      }
-      return false;
-    },
-
-    /**
-     * validate Login date
-     */
-    validateRegister: function () {
-      return this.userInfo.firstName.length &&
-          this.userInfo.lastName.length &&
-          this.userInfo.email.length &&
-          (this.userInfo.password.length >= MIN_PASSWORD_LENGTH) &&
-          (this.userInfo.password === this.confirmPassword);
-    },
     //todo update the function
     openImage: async function (event) {
       if (event.target.files[0]) {
         this.image.imgUrl = window.URL.createObjectURL(event.target.files[0]);
         this.hasImage = true;
         this.editImage = true;
-
         this.image.imgBaseData = this.$refs.file.files[0];
-        event.target.value = '';//todo can take the the name of the file
+        event.target.value = '';
       }
 
 
@@ -291,7 +302,14 @@ export default {
       this.hasImage = true;
       this.editImage = false;
       this.image.imgUrl = this.editUserImage;
-    }
+    },
+    makeNotify(title, message, type) {
+      this.$notify({
+        title: title,
+        message: message,
+        type: type
+      });
+    },
   },
 
   computed: {
@@ -308,6 +326,7 @@ export default {
           "this.setCustomValidity('')";
     }
   },
+
 
   // watch: {
   //   editUser(user) {
