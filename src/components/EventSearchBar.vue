@@ -176,7 +176,7 @@ export default {
     },
 
     eventSearch: function () {
-      this.query = ''; // init
+      this.query = '';
       this.setQuery();
       this.getEvents();
     },
@@ -212,8 +212,7 @@ export default {
       }
       if (this.searchParameters.q.length) {
         this.query += (this.query.length) ? '&' : '?';
-        this.searchParameters.q = this.searchParameters.q.replaceAll(' ', '%20');
-        this.query += `q=${this.searchParameters.q}`;
+        this.query += `q=${this.searchParameters.q.replaceAll(' ', '%20')}`;
       }
       if (this.searchParameters.categoryIds.length) {
         for (const id of this.searchParameters.categoryIds) {
