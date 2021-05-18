@@ -5,20 +5,19 @@
         <div class="col-md-10">
           <div class="row p-2 bg-white border shadow" @click="goToEventProfile"><!--rounded-->
             <div class="col-md-3 mt-1">
-              <!--box main-image-->
               <img class="img-fluid img-responsive rounded" :src="eventImage" alt="event"
                    @error="setEventImageDefault"/>
-              <!--todo nee fix the error massage-->
             </div>
-            <div class="col-md-6 mt-1"><!--Spacing 间距-->
+            <div class="col-md-6 mt-1">
 
               <h2>{{ event.title }}</h2>
 
+              <hr>
               <div class="row responsive">
                 <strong class="col-5">Date:</strong>
-                <span class="col-6">{{ event.date }}</span><!--todo modify date-->
+                <span class="col-7">{{ setDate }}</span>
               </div>
-
+              <hr>
               <div class="row responsive">
                 <strong class="col-5">Attendees:</strong>
                 <span class="col-6">{{ event.attendeeCount }}</span>
@@ -29,30 +28,25 @@
               <div class="row">
                 <strong class="col-5 ">Category:</strong>
               </div>
-              <div class="tag-group" >
+              <div class="tag-group">
                 <el-tag
                     style="margin-right: 10px; margin-top: 10px"
                     type="success"
                     v-for="(category, index) in categoriesResultList"
                     v-bind:key="index">
                   {{ category.name }}
-                </el-tag >
+                </el-tag>
                 <br>
               </div>
-              <hr>
-
 
             </div>
 
             <div class="align-items-center align-content-center col-md-3 border-left mt-2">
-
-              <!--              <strong class="col-3">Organizer:</strong>-->
-
-
-              <div class="d-flex flex-row align-items-center  mt-4">
-                <img class="rounded" :src="userImage" width="50" height="50" alt="user" @error="setUserImageDefault"/>
-                <!--                onerror="this.onerror=null;this.src='https://cdn.discordapp.com/attachments/474461177309691904/711913897820422195/defaultUser.png';"-->
-                <span class="col-5">
+              <div class="d-flex flex-row align-items-center mt-5">
+                <img class="rounded" :src="userImage" width="100" height="100" alt="user" @error="setUserImageDefault"/>
+              </div>
+              <div class="d-flex flex-row align-items-center  mt-3">
+                <span class="col-6">
                   {{ event.organizerFirstName }} {{ event.organizerLastName }}
                 </span>
               </div>
@@ -71,7 +65,6 @@
 </template>
 
 <script>
-// import Api from '../api';
 
 export default {
   name: "event-card",
@@ -93,7 +86,7 @@ export default {
         capacity: null,
         description: "",
         organizerId: null,
-        date: "2012-04-23T18:25:43.511Z",//todo should change
+        date: "2012-04-23T18:25:43.511Z",
         isOnline: false,
         url: "",
         venue: "",
@@ -120,14 +113,13 @@ export default {
   methods: {
     initCardInfo: async function () {
       await this.getCategories();
-      await this.getEvent();//todo
+      await this.getEvent();
       this.setUpCategoriesTypes();
     },
     getEvent: async function () {
       await this.$api.getEvent(this.eventId)
           .then((response) => {
             this.event = response.data;
-            // console.log(this.event);
           })
           .then(() => {
             this.eventImage = this.$api.getEventImage(this.eventId);
@@ -140,8 +132,6 @@ export default {
             this.error.eventError = error.message;
             this.loading = false;
           })
-
-
     },
 
     goToEventProfile: function () {
@@ -165,19 +155,19 @@ export default {
     },
     setUpCategoriesTypes: function () {
       this.categoriesResultList = [];
-      // console.log(this.event.categories, 11111);
       this.event.categories.forEach((id) => {
-        // console.log(this.categoriesAllTypes, 22222222);
         this.categoriesAllTypes.forEach((category) => {
-
           if (id === category.id) {
             this.categoriesResultList.push(category);
           }
         });
       });
-      // console.log(this.categoriesResultList);
     }
-
+  },
+  computed: {
+    setDate() {
+      return new Date(this.event.date).toString().split(' ').splice(0, 5).join(' ');
+    }
   }
 }
 </script>

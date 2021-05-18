@@ -1,13 +1,20 @@
 <template>
   <div>
-    <event-search-bar @sentEventData="passEventData($event)"/><!-- pass events -->
+    <event-search-bar @sentEventData="passEventData($event)"/>
     <div v-show="eventItem.length">
       <event-card
           v-for="event in eventItem.slice(eventsMinRange, eventsMaxRange)"
           v-bind:key="event"
           :event-id='event.eventId'/>
 
+
       <div class="container mt-4 mb-4">
+        <div class="d-flex justify-content-center row" style="font-family: 'Arial',serif;">
+          Displaying {{ showMin }} - {{ showMax }} of total {{ totalEvents }} results
+        </div>
+      </div>
+      <div class="container mb-4">
+
         <div class="d-flex justify-content-center row">
           <el-pagination
               @current-change="handleCurrentChange"
@@ -17,6 +24,8 @@
               :current-page="currentPage"
               :total="totalEvents">
           </el-pagination>
+
+
         </div>
       </div>
     </div>
@@ -40,7 +49,7 @@ export default {
     return {
       eventItem: [],
       totalEvents: 0,
-      perPage: 5,
+      perPage: 10,
       currentPage: 1,
     }
   },
@@ -60,7 +69,14 @@ export default {
     },
     eventsMaxRange: function () {
       return this.currentPage * this.perPage;
+    },
+    showMin: function () {
+      return this.currentPage === 1 ? 1 : (this.currentPage - 1) * this.perPage + 1;
+    },
+    showMax: function () {
+      return this.currentPage * this.perPage <= this.totalEvents ? this.currentPage * this.perPage : this.totalEvents;
     }
+
   }
 }
 </script>

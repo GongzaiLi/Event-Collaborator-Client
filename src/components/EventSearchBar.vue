@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="container mt-6 mb-2">
-      <div class="d-flex justify-content-center row"><!-- justify-content-center means center   d-flex a container-->
+      <div class="d-flex justify-content-center row">
         <div class="col-md-10">
-          <div class=" p-2 bg-white shadow">
+          <div class="p-2 bg-white shadow">
             <button id="searchAreaButton" class="btn btn-secondary btn-lg btn-block" type="button"
                     data-toggle="collapse"
                     data-target="#collapseSearch"
@@ -15,8 +15,8 @@
           <div class="my-2 p-3 bg-white rounded shadow">
 
 
-            <div class="collapse" id="collapseSearch"><!--collapse-->
-              <form @submit.prevent> <!---todo--->
+            <div class="collapse" id="collapseSearch">
+              <form @submit.prevent>
 
                 <div class="form-row">
                   <div class="col-md-8 mb-3">
@@ -66,41 +66,25 @@
 
                 </div>
 
-                <div class="form-row mb-3">
-                  <div class="col-md-12">
-                    <label><strong>Category ID: (Can add more then one)</strong></label>
-                    <form @submit.prevent>
-                      <div class="input-group shadow">
-                        <input type="number" class="form-control" placeholder="Category ID"
-                               aria-label="Recipient's username" v-model="categoryId" min="0" step="1" required>
-                        <div class="input-group-append">
-                          <button class="btn btn-outline-secondary" type="submit" @click="addCategoryList">Add
-                          </button><!--todo need show category List> may use the tag-->
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
+
 
                 <div class="form-row mb-3">
                   <div class="col-md-12">
-                    <label><strong>Selected Category ID:</strong></label>
-                    <form v-for="id in searchParameters.categoryIds" v-bind:key="id">
-                      <div class="input-group shadow mb-2">
-                        <input type="number" class="form-control" :placeholder="id"
-                               aria-label="Recipient's username" disabled>
-                        <div class="input-group-append">
-                          <button class="btn btn-outline-secondary" type="button" @click="cleanCategoryList(id)">-
-                          </button>
-                        </div>
-                      </div>
-
-                    </form>
+                    <label><strong>Category Type: (Can add more then one)</strong></label>
+                    <div class="shadow">
+                      <el-select v-model="searchParameters.categoryIds" multiple filterable placeholder="Choose Category" style="width: 100%">
+                        <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                      </el-select>
+                    </div>
                   </div>
                 </div>
 
-
-                <div class="row">
+                <div class="p-2 bg-white row">
                   <div class="col-md-10">
                     <button class="btn btn-secondary btn-lg" type="submit" @click="eventSearch" style="width: 20%">
                       Search
@@ -119,11 +103,10 @@
     </div>
   </div>
 
-
 </template>
 
 <script>
-// import Api from '../api';
+
 
 export default {
   name: "event-search-bar",
@@ -142,37 +125,26 @@ export default {
       sortByOptionList: {
         'Attendees (L to H)': 'ATTENDEES_ASC',
         'Attendees (H to L)': 'ATTENDEES_DESC',
-        'Capacity (L to H)': 'CAPACITY_ASC',
-        'Capacity (H to L)': 'CAPACITY_DESC',
         'Date (Old To New)': 'DATE_ASC',
         'Date (New To Old)': 'DATE_DESC',
-        'Title (A-Z)': 'ALPHABETICAL_ASC',
-        'Title (Z-A)': 'ALPHABETICAL_DESC',
       },
+      // 'Capacity (L to H)': 'CAPACITY_ASC',
+      // 'Capacity (H to L)': 'CAPACITY_DESC',
+      // 'Title (A-Z)': 'ALPHABETICAL_ASC',
+      // 'Title (Z-A)': 'ALPHABETICAL_DESC',
       categoryId: null,
       categoryTypes: [],
+      options: [],
 
     }
   },
   mounted() {
-    //todo check login or not sortByOptionList has?????
     this.getCategories();
   },
   methods: {
     switchSearchArea: function () {
       this.searchArea = this.searchArea !== 'Close' ? 'Close' : 'Open Search Box';
       document.getElementById("searchAreaButton").innerHTML = this.searchArea;
-    },
-    cleanCategoryList: function (id) {
-      const index = this.searchParameters.categoryIds.indexOf(id.toString());
-      if (index > -1) {
-        this.searchParameters.categoryIds.splice(index, 1);
-      }
-    },
-    addCategoryList: function () {
-      if (this.categoryId && !this.searchParameters.categoryIds.includes(this.categoryId)) {
-        this.searchParameters.categoryIds.push(this.categoryId);
-      }
     },
 
     eventSearch: function () {
@@ -183,27 +155,26 @@ export default {
 
     getEvents: function () {
       this.$api.getEvents(this.query)
-        .then((response) => {
-          this.$emit('sentEventData', response.data);
-        })
-        .catch((error) => {
-          alert(error.message);
-        })
+          .then((response) => {
+            this.$emit('sentEventData', response.data);
+          })
+          .catch((error) => {
+            alert(error.message);
+          })
     },
 
-    getCategories: function () {
-      this.$api.getEventCategories()
-        .then((response) => {
-          this.categoryTypes = response.data;
-          // console.log(this.categoryTypes);
-        })
-        .catch((error) => {
-          alert(error.message);
-        })
+    getCategories: async function () {
+      await this.$api.getEventCategories()
+          .then((response) => {
+            this.categoryTypes = response.data;
+            this.setOption(this.categoryTypes);
+          })
+          .catch((error) => {
+            alert(error.message);
+          })
     },
 
     setQuery: function () {
-      //todo simplify the function
       for (const key in this.searchParameters) {
         if (this.searchParameters[key].length && key !== 'categoryIds' && key !== 'sortBy' && key !== 'q') {
           this.query += (this.query.length) ? '&' : '?';
@@ -215,7 +186,7 @@ export default {
         this.query += `q=${this.searchParameters.q.replaceAll(' ', '%20')}`;
       }
       if (this.searchParameters.categoryIds.length) {
-        for (const id of this.searchParameters.categoryIds) {
+        for (const id of Object.values(this.searchParameters.categoryIds)) {
           this.query += (this.query.length) ? '&' : '?';
           this.query += `categoryIds=${id}`;
         }
@@ -231,6 +202,13 @@ export default {
       Object.keys(this.searchParameters).forEach(key => this.searchParameters[key] = '');
       this.searchParameters.categoryIds = [];
       this.query = '';
+    },
+
+    setOption: function (categories) {
+      this.options = [];
+      categories.forEach((category) => {
+        this.options.push({value: category.id, label: category.name});
+      })
     }
   }
 }
