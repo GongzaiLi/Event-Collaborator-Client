@@ -1,12 +1,12 @@
 <template>
 
   <div class="row py-5 px-4" v-if="!loading">
-    <div class="col-md-6 mx-auto" v-if="foundUser">
+    <div class="col-md-8 mx-auto" v-if="foundUser">
       <div class="bg-white shadow rounded overflow-hidden">
 
         <div class="px-4 pt-0 pb-4 cover">
           <div class="media align-items-end profile-head">
-            <div class="profile mr-3" style="margin-top: 0.7em">
+            <div class="profile mr-5" style="margin-top: 1.0em">
 
               <img :src="userImage" alt="userImage" width="120" class="rounded mb-2 img-thumbnail"
                    @error="setUserImageDefault">
@@ -16,8 +16,8 @@
               </button>
 
             </div>
-            <div class="media-body mb-5">
-              <h4 class="mt-0 mb-0">{{ user.firstName }} {{ user.lastName }}</h4>
+            <div class="media-body mb-6">
+              <h4 class="mt-2 mb-1">{{ user.firstName }} {{ user.lastName }}</h4>
               <p class="mb-4"> <!--small-->
                 {{ user.email }}
               </p>
@@ -57,7 +57,7 @@
                   prop="date"
                   label="Date"
                   sortable
-                  width="150"/>
+                  width="200"/>
               <el-table-column
                   prop="role"
                   label="Role"
@@ -66,12 +66,12 @@
               <el-table-column
                   prop="status"
                   label="Status"
-                  width="100"/>
+                  width="90"/>
 
               <el-table-column label="Action" width="150">
                 <template #default="scope">
 
-                  <div v-if="scope.row.role === 'organizer'">
+                  <div v-if="scope.row.role === 'organizer' && checkEventDate(scope.row)">
                     <el-button
                         size="mini"
                         type="success"
@@ -124,7 +124,7 @@
                   <el-button type="danger" class="btn btn-outline-danger" data-dismiss="modal" circle
                              icon="el-icon-close"/>
                 </div>
-                <event-create-and-edit v-if="eventModal" :edit-modal="true" :edit-event-info="editEventInfo"/>
+                <event-create-and-edit v-if="eventModal" :edit-modal="true" :edit-event-info="editEventInfo" :reload-user-profile="setUpUserProfile"/>
                 <register-and-edit
                     v-else
                     :edit-modal="true"
@@ -272,22 +272,21 @@ export default {
       tableItem.image = this.$api.getEventImage(event.id);
       tableItem.eventId = event.id;
       tableItem.title = event.title;
-      tableItem.date = event.date;
+      tableItem.date = this.setDate(event.date);
       tableItem.role = this.$currentUser.checkLoginUser(event.organizerId) ? 'organizer' : 'attendee';
       tableItem.status = status;
+
       if (!this.checkTableHadItem(tableItem.eventId)) this.tableData.push(tableItem);
     },
     /**
      * open the event edit modal.
      **/
     eventEdit(row) {
-      //todo check later
       this.editEventInfo = row;
       this.eventModal = true;
       window.$('#editUserModal').modal('show');//
     },
     eventDelete(row) {
-      //todo check later
       this.$api.deleteEvent(row.eventId, this.$currentUser.getToken())
           .then(() => {
             this.setUpUserProfile();
@@ -329,6 +328,14 @@ export default {
         message: message,
         type: type
       });
+    },
+    setDate(date) {
+      return new Date(date).toString().split(' ').splice(0, 5).join(' ');
+    },
+    checkEventDate(event) {
+      let date = new Date(event.date);
+      let now = new Date();
+      return date > now;
     }
   },
   watch: {

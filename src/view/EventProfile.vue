@@ -1,11 +1,11 @@
 <template>
   <div class="row py-5 px-4" v-show="!loading">
 
-    <div class="col-md-6  mx-auto">
+    <div class="col-md-7  mx-auto">
       <div class="bg-white shadow rounded overflow-hidden ">
 
         <div class="px-4 pt-2 pb-4 cover">
-          <img :src="eventImage" class="card-img" alt="event" @error="setEventImageDefault"/>
+          <img :src="eventImage" class="card-img" alt="event"  @error="setEventImageDefault"/>
         </div>
 
         <div class="bg-light p-4 d-flex text-center">
@@ -25,13 +25,13 @@
           <div class="align-items-start align-content-center col-md-8 border-left mt-0">
             <h4><i class="el-icon-wind-power"/> {{ event.title }} </h4>
             <hr/>
-            <h5 class="mt-0 mb-1"><i class="el-icon-date"/> Date: {{ setDate }}</h5>
+            <h5 class="mt-0 mb-1"><i class="el-icon-date"/> Date: {{ setDate(event.date) }}</h5>
             <h5 class="mt-0 mb-1"><i class="el-icon-user"/> Capacity: {{ event.capacity || 'No limit' }}</h5>
             <h5 class="mt-0 mb-1"><i class="el-icon-ship"/> Attendees: {{ event.attendeeCount }}
               (Available:{{ availableSeat }})</h5>
             <!-- only accepted-->
-            <h5 class="mt-0 mb-1" v-show="event.url && event.url.length"><i class="el-icon-loading"/> Url:
-              {{ event.url }}</h5>
+            <h5 class="mt-0 mb-1"><i class="el-icon-loading"/> Url:
+              {{ setUrl }}</h5>
             <h5 class="mt-0 mb-1"><i class="el-icon-place"/> Venue: {{ event.venue }}</h5>
             <h5 class="mt-0 mb-1"><i class="el-icon-money"/> Fee: {{ event.fee > 0 ? event.fee : "Free" }}</h5>
           </div>
@@ -92,41 +92,40 @@
                 prop="lastName"
                 label="Last Name"
                 sortable
-                /><!--width="150"-->
-            <div v-if="checkRole">
+                :width="checkRole? 150: 450"
+            />
+
             <el-table-column
+                v-if="checkRole"
                 prop="role"
                 label="Role"
                 sortable
-                width="150"/>
+                width="100"/>
+
             <el-table-column
+                v-if="checkRole"
                 prop="dateOfInterest"
                 label="Date Of Interest"
                 sortable
-                width="150"/>
+                width="200"/>
+
             <el-table-column
+                v-if="checkRole"
                 prop="status"
                 label="Status"
                 width="100"/>
 
-
-            <el-table-column label="Action" width="180" prop="options">
+            <el-table-column v-if="checkRole" label="Action" width="180" prop="options">
               <template #default="scope">
-                <div v-if="checkRole && scope.row.status === 'pending'">
-                  <!--todo not sure only can change pending or other status-->
-                  <el-button
-                      size="mini"
-                      type="success"
-                      @click.stop="changeUserAttendees(scope.row)">Edit
-                  </el-button>
-                </div>
-                <div v-else>
-                  <span>No privilege</span>
-                </div>
+                <el-button
+                    size="mini"
+                    type="success"
+                    @click.stop="changeUserAttendees(scope.row)">Edit
+                </el-button>
+
               </template>
             </el-table-column>
 
-            </div>
 
           </el-table>
         </div>
@@ -260,19 +259,19 @@ export default {
       valueOption: '',// todo check if a person accepted can change the status or not
       userOption: {},
       options: [{
-        value: 1,
+        value: 'accepted',
         label: 'accepted',
         disabled: true
       }, {
-        value: 3,
+        value: 'pending',
+        label: 'pending',
+        disabled: true
+      }, {
+        value: 'rejected',
         label: 'rejected',
         disabled: true
       }],
-      // {
-      //   value: 2,
-      //       label: 'pending',
-      //     disabled: true
-      // },
+
     }
   },
   mounted() {
@@ -287,7 +286,7 @@ export default {
       await this.getAllEvents();
       this.setUpCategoriesTypes();
     },
-    getEvent: async function () {
+    getEvent: async function getEvent() {
       await this.$api.getEvent(this.eventId)
           .then((response) => {
             this.event = response.data;
@@ -297,7 +296,7 @@ export default {
             this.eventImage = this.$api.getEventImage(this.eventId);
           })
           .then(() => {
-            this.userImage = this.$api.getUserImage(this.event.organizerId);
+            this.this.userImage = this.$api.getUserImage(this.event.organizerId);
             this.loading = false;
           })
           .catch((error) => {
@@ -354,7 +353,7 @@ export default {
         tableItem.lastName = user.lastName;
         tableItem.role = this.event.organizerId === user.attendeeId ? 'organizer' : 'attendee';
         tableItem.status = user.status;
-        tableItem.dateOfInterest = user.dateOfInterest;
+        tableItem.dateOfInterest = this.setDate(user.dateOfInterest);
         this.tableData.push(tableItem);
         tableItem = {};
       })
@@ -474,10 +473,12 @@ export default {
       this.initEventProfile();
     },
     changeUserAttendees(user) {
+      console.log(user, 1111111111111);
       this.userOption = user;
       window.$('#editAttendeesModal').modal('show');
     },
     editAttendees() {
+
       let status = {
         status: this.valueOption
       }
@@ -489,7 +490,11 @@ export default {
           .catch((error) => {
             this.makeNotify('Control attendance', error.message, 'warning')
           })
-    }
+      window.$('#editAttendeesModal').modal('hide');
+    },
+    setDate(date) {
+      return new Date(date).toString().split(' ').splice(0, 5).join(' ');
+    },
   },
   computed: {
     availableSeat() {
@@ -506,8 +511,8 @@ export default {
     checkRole() {
       return this.$currentUser.checkLoginUser(this.event.organizerId);
     },
-    setDate() {
-      return new Date(this.event.date).toString().split(' ').splice(0, 5).join(' ');
+    setUrl(){
+      return this.event.url ? this.event.url : 'None';
     }
 
   },

@@ -15,14 +15,15 @@
                   @change="openImage($event)" ref="file" @blur="validateImage($event)"
                   style="margin-top: 0.5em"
               >
-              <button class="btn btn-secondary btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
+              <button class="btn btn-secondary btn-sm" form="imageInput">Remove Photo</button>
             </div>
           </div>
           <hr>
 
           <div class="card-body">
 
-            <el-form :model="newEvent" :rules="rules" ref="newEvent" label-width="120px" class="demo-ruleForm">
+            <el-form :model="newEvent" :rules="rules" ref="newEvent" label-width="120px" class="demo-ruleForm"
+                     @submit.prevent='action'>
 
               <el-form-item label="Title: " prop="title">
                 <el-input v-model="newEvent.title"></el-input>
@@ -95,8 +96,7 @@
 
 
               <el-form-item>
-                <el-button v-if="editModal" type="primary" @click="eventEdit('newEvent')">Edit</el-button>
-                <el-button v-else type="primary" @click="eventCreate('newEvent')">Create</el-button>
+                <el-button type="primary" @click="action('newEvent')">Ok</el-button>
                 <el-button @click="resetForm('newEvent')">Reset</el-button>
               </el-form-item>
             </el-form>
@@ -125,6 +125,9 @@ export default {
     editEventInfo: {
       type: Object,
       default: () => ({}),
+    },
+    reloadUserProfile: {
+      type: Function,
     }
   },
   data() {
@@ -161,6 +164,7 @@ export default {
         fee: 0
       },
       hasImage: false,
+      editImage: false,
 
       rules: {
         title: [
@@ -215,74 +219,84 @@ export default {
     this.initEventCreateAndEdit();
   },
   methods: {
+    action: function (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid && this.validateImage()) {
+          if (this.editModal) {
+            this.eventEdit();
+          } else {
+            this.eventCreate();
+          }
+        }
+      });
+    },
     initEventCreateAndEdit() {
       this.getCategories();
       if (this.editModal) {
         this.editEventSetUp(this.editEventInfo);
       }
     },
-    //todo modify the function
     editEventSetUp(event) {
+      let date = new Date(event.date);
       this.newEvent.title = event.title;
-      this.newEvent.categoryIds = event.categoryIds;
-      this.newEvent.date = event.date;
+      this.newEvent.categoryIds = event.categories;
+      this.newEvent.date = date;
+      this.newEvent.time = date;
       this.newEvent.isOnline = event.isOnline === 1;
-      this.newEvent.url = event.url;
-      this.newEvent.venue = event.venue;
-      this.newEvent.capacity = event.capacity || 0;
+      this.newEvent.url = event.url || '';
+      this.newEvent.venue = event.venue || '';
+      this.newEvent.capacity = parseInt(event.capacity) || 0;
       this.newEvent.requiresAttendanceControl = event.requiresAttendanceControl === 1;
-      this.newEvent.fee = event.fee;
+      this.newEvent.fee = parseFloat(event.fee);
       this.newEvent.description = event.description;
-      this.eventImage = event.image;
+      this.image.imgUrl = event.image;
       this.eventId = event.eventId;
+      this.hasImage = true;
+      this.editImage = false;
     },
-    eventEdit(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
+    eventEdit: async function () {
+      console.log(this.newEvent.url, typeof this.newEvent.url);
 
-          this.$api.editEvent(this.eventId, this.newEvent, this.$currentUser.getToken())
-              .then(() => {
-                //todo then put event image
-              })
+      await this.$api.editEvent(this.eventId, this.setUpNewEventRequest, this.$currentUser.getToken())
+          .then(() => {
 
-        } else {
+            if (this.editImage) {
+              this.putImage(this.eventId);
+            }
 
-          return false;
-        }
-      });
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+
       window.$('#editUserModal').modal('hide');//
+      this.reloadUserProfile();
     },
 
-    eventCreate(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid && this.validateImage()) {
-          this.$api.createEvent(this.setUpNewEventRequest, this.$currentUser.getToken())
-              .then((response) => {
-                this.eventId = response.data.eventId
+    eventCreate() {
 
-              })
-              .then(() => {
-                this.putImage(this.eventId);
-              })
-              .catch((error) => {
-                console.log(error);
-              })
-
-        } else {
-
-          return false;
-        }
-      });
+      this.$api.createEvent(this.setUpNewEventRequest, this.$currentUser.getToken())
+          .then((response) => {
+            this.eventId = response.data.eventId
+          })
+          .then(() => {
+            this.putImage(this.eventId);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
     },
     putImage: async function (eventId) {
       await this.$api.putEventImage(eventId, this.image, this.$currentUser.getToken())
           .then(() => {
             console.log(32222222222222222222222);
+
             // show successful
           })
           .catch((error) => {
             console.log(error);
           })
+      this.hasImage = false;
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
@@ -295,6 +309,7 @@ export default {
       if (event.target.files[0]) {
         this.image.imgUrl = window.URL.createObjectURL(event.target.files[0]);
         this.hasImage = true;
+        this.editImage = true;
         this.image.imgBaseData = this.$refs.file.files[0];
         console.log(this.image.imgBaseData);
         console.log(this.image.imgBaseData.type);
@@ -304,6 +319,7 @@ export default {
     removePhoto: function () {
       this.image.imgUrl = this.image.defaultImage;
       this.hasImage = false;
+      this.editImage = false;
     },
     getCategories: async function () {
       await this.$api.getEventCategories()
