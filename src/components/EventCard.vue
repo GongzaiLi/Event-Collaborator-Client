@@ -24,15 +24,23 @@
                 <span class="col-6">{{ event.attendeeCount }}</span>
               </div>
 
-              <div class="row">
-                <strong class="col-5">Category:</strong>
-                <div class="col-6">
-                  <span class="mb-1" v-for="(category, index) in categoriesResultList" v-bind:key="index">
-                    {{ category.name + ' | ' }}<!--todo may need modify-->
-                  </span>
-                </div>
 
+              <hr>
+              <div class="row">
+                <strong class="col-5 ">Category:</strong>
               </div>
+              <div class="tag-group" >
+                <el-tag
+                    style="margin-right: 10px; margin-top: 10px"
+                    type="success"
+                    v-for="(category, index) in categoriesResultList"
+                    v-bind:key="index">
+                  {{ category.name }}
+                </el-tag >
+                <br>
+              </div>
+              <hr>
+
 
             </div>
 
