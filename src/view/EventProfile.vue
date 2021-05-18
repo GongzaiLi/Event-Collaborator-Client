@@ -1,9 +1,7 @@
 <template>
   <div class="row py-5 px-4" v-show="!loading">
-    <!--loading-->
 
-    <div class="col-md-7  mx-auto">
-      <!-- Profile widget -->
+    <div class="col-md-6  mx-auto">
       <div class="bg-white shadow rounded overflow-hidden ">
 
         <div class="px-4 pt-2 pb-4 cover">
@@ -25,9 +23,9 @@
             </div>
           </div>
           <div class="align-items-start align-content-center col-md-8 border-left mt-0">
-            <h4> {{ event.title }} </h4>
+            <h4><i class="el-icon-wind-power"/> {{ event.title }} </h4>
             <hr/>
-            <h5 class="mt-0 mb-1"><i class="el-icon-date"/> Date: {{ event.date }}</h5>
+            <h5 class="mt-0 mb-1"><i class="el-icon-date"/> Date: {{ setDate }}</h5>
             <h5 class="mt-0 mb-1"><i class="el-icon-user"/> Capacity: {{ event.capacity || 'No limit' }}</h5>
             <h5 class="mt-0 mb-1"><i class="el-icon-ship"/> Attendees: {{ event.attendeeCount }}
               (Available:{{ availableSeat }})</h5>
@@ -43,7 +41,15 @@
         <div class="px-4 py-3">
           <h5 class="mb-0"><i class="el-icon-receiving"/>Categories</h5>
           <div class="p-4 rounded shadow-sm bg-light">
-            <p style="text-align: justify;">{{ categoriesResultList }}</p>
+            <div class="tag-group">
+              <el-tag
+                  style="margin-right: 10px; margin-top: 10px"
+                  type="info" effect="dark"
+                  v-for="category in categoriesResultList"
+                  v-bind:key="category">
+                {{ category }}
+              </el-tag>
+            </div>
           </div>
         </div>
 
@@ -86,7 +92,7 @@
                 prop="lastName"
                 label="Last Name"
                 sortable
-                width="150"/>
+                /><!--width="150"-->
             <div v-if="checkRole">
             <el-table-column
                 prop="role"
@@ -134,7 +140,7 @@
               <h5 class="mb-2"><i class="el-icon-loading"/>Similar event</h5>
             </div>
 
-            <el-carousel indicator-position="outside">
+            <el-carousel indicator-position="outside" height="420px">
               <el-carousel-item v-for="eventId in similarEvents" v-bind:key="eventId">
                 <event-card :event-id="eventId" @click="reload"/><!-- @click="reload" -->
               </el-carousel-item>
@@ -160,7 +166,7 @@
 
             <div class="modal-content">
 
-              <div class="modal-header  mb-2">
+              <div class="modal-header mb-2">
                 <h5 class="modal-title">Control attendance</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
@@ -169,7 +175,6 @@
 
 
               <div class="modal-body mb-2">
-
 
                 <el-row :gutter="20">
                   <el-col :span="12" :offset="6">
@@ -185,7 +190,6 @@
                     </div>
                   </el-col>
                 </el-row>
-
 
               </div>
 
@@ -230,7 +234,7 @@ export default {
         capacity: null,
         description: "",
         organizerId: null,
-        date: "2012-04-23T18:25:43.511Z",//todo should change
+        date: "",
         isOnline: false,
         url: "",
         venue: "",
@@ -287,7 +291,7 @@ export default {
       await this.$api.getEvent(this.eventId)
           .then((response) => {
             this.event = response.data;
-            this.event.attendeeCount = response.data.attendeeCount || 0; //todo the date set up
+            this.event.attendeeCount = response.data.attendeeCount || 0;
           })
           .then(() => {
             this.eventImage = this.$api.getEventImage(this.eventId);
@@ -381,7 +385,7 @@ export default {
 
         this.$api.createEventAttendees(this.eventId, this.$currentUser.getToken())
             .then(() => {
-              this.initEventProfile();//todo check the table is refresh
+              this.initEventProfile();
             })
             .catch((error) => {
               this.makeNotify('Cancel Attendees', error.message, 'warning');
@@ -397,7 +401,7 @@ export default {
       } else {
         this.$api.deleteEventAttendees(this.eventId, this.$currentUser.getToken())
             .then(() => {
-              this.initEventProfile();//todo check the table is refresh
+              this.initEventProfile();
             })
             .catch((error) => {
 
@@ -501,6 +505,9 @@ export default {
     },
     checkRole() {
       return this.$currentUser.checkLoginUser(this.event.organizerId);
+    },
+    setDate() {
+      return new Date(this.event.date).toString().split(' ').splice(0, 5).join(' ');
     }
 
   },

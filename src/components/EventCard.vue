@@ -36,7 +36,6 @@
                     v-bind:key="index">
                   {{ category.name }}
                 </el-tag>
-                <br>
               </div>
 
             </div>
