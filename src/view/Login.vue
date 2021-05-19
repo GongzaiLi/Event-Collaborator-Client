@@ -13,7 +13,7 @@
 
               <form @submit.prevent>
                 <div class="form-group">
-                  <label>email:</label><br>
+                  <label>Email:</label><br>
                   <input type="email" class="form-control" required v-model="loginInf.email" />
                 </div>
                 <div class="form-group">
