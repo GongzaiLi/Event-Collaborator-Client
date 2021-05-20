@@ -361,7 +361,7 @@ export default {
         requiresAttendanceControl: this.newEvent.requiresAttendanceControl,
         fee: this.newEvent.fee
       }
-      if (this.newEvent.capacity !== 0) requestBody.capacity = this.newEvent.capacity;
+      if (this.newEvent.capacity !== 0) requestBody.capacity = this.newEvent.capacity;//todo when the capacity limit
       return requestBody;
     }
   },
