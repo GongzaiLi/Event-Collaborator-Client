@@ -246,11 +246,6 @@ export default {
       },
       categoriesAllTypes: [],
       categoriesResultList: [],
-      error: {
-        eventError: '',
-        eventImageError: '',
-        userImageError: ''
-      },
       loading: true,
       similarEvents: [],
       eventAttendees: {},
@@ -296,11 +291,11 @@ export default {
             this.eventImage = this.$api.getEventImage(this.eventId);
           })
           .then(() => {
-            this.this.userImage = this.$api.getUserImage(this.event.organizerId);
+            this.userImage = this.$api.getUserImage(this.event.organizerId);
             this.loading = false;
           })
           .catch((error) => {
-            this.error.eventError = error.message;
+            this.makeNotify('Read a event', error.response.statusText, 'error');
             this.loading = false;
           })
 
@@ -312,7 +307,7 @@ export default {
             this.categoriesAllTypes = response.data;
           })
           .catch((error) => {
-            alert(error.message);
+            this.makeNotify('Read all categories', error.response.statusText, 'error');
           })
     },
     getEventAttendees: async function () {
@@ -322,7 +317,7 @@ export default {
             this.setUpAttendeesTable(response.data);
           })
           .catch((error) => {
-            console.log(error.message);
+            this.makeNotify('Read this events attendees', error.response.statusText, 'error');
           })
     },
     setUpCategoriesTypes: function () {
@@ -368,7 +363,7 @@ export default {
             })
           })
           .catch((error) => {
-            console.log(error);
+            this.makeNotify('Read this events attendees', error.response.statusText, 'error');
           })
     },
     checkSimilarEvent: function (event) {
@@ -384,10 +379,11 @@ export default {
 
         this.$api.createEventAttendees(this.eventId, this.$currentUser.getToken())
             .then(() => {
+              this.makeNotify('Join', "You Success Join a Event", 'success');
               this.initEventProfile();
             })
             .catch((error) => {
-              this.makeNotify('Cancel Attendees', error.message, 'warning');
+              this.makeNotify('Join', error.message, 'warning');
             })
       }
     },
@@ -400,11 +396,11 @@ export default {
       } else {
         this.$api.deleteEventAttendees(this.eventId, this.$currentUser.getToken())
             .then(() => {
+              this.makeNotify('Cancel Attendee', "Success Cancel Your Attendee", 'success');
               this.initEventProfile();
             })
             .catch((error) => {
-
-              this.makeNotify('Join A Event', error.message, 'warning');
+              this.makeNotify('Cancel Attendee', error.message, 'warning');
             })
       }
     },
@@ -473,7 +469,6 @@ export default {
       this.initEventProfile();
     },
     changeUserAttendees(user) {
-      console.log(user, 1111111111111);
       this.userOption = user;
       window.$('#editAttendeesModal').modal('show');
     },
