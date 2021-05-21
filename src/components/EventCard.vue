@@ -92,11 +92,6 @@ export default {
         requiresAttendanceControl: 0,
         fee: null
       },
-      error: {
-        eventError: '',
-        eventImageError: '',
-        userImageError: ''
-      },
       categoriesAllTypes: [],
       categoriesResultList: [],
 
@@ -128,7 +123,7 @@ export default {
             this.loading = false;
           })
           .catch((error) => {
-            this.error.eventError = error.message;
+            this.makeNotify('Read a event', error.response.statusText, 'error');
             this.loading = false;
           })
     },
@@ -149,7 +144,7 @@ export default {
             this.categoriesAllTypes = response.data;
           })
           .catch((error) => {
-            alert(error.message);
+            this.makeNotify('Read All Categories', error.response.statusText, 'error');
           })
     },
     setUpCategoriesTypes: function () {
@@ -161,7 +156,14 @@ export default {
           }
         });
       });
-    }
+    },
+    makeNotify(title, message, type) {
+      this.$notify({
+        title: title,
+        message: message,
+        type: type
+      });
+    },
   },
   computed: {
     setDate() {

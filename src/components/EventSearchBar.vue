@@ -159,7 +159,7 @@ export default {
             this.$emit('sentEventData', response.data);
           })
           .catch((error) => {
-            alert(error.message);
+            this.makeNotify('Read All Events', error.response.statusText, 'error');
           })
     },
 
@@ -170,7 +170,7 @@ export default {
             this.setOption(this.categoryTypes);
           })
           .catch((error) => {
-            alert(error.message);
+            this.makeNotify('Read All Categories', error.response.statusText, 'error');
           })
     },
 
@@ -209,7 +209,14 @@ export default {
       categories.forEach((category) => {
         this.options.push({value: category.id, label: category.name});
       })
-    }
+    },
+    makeNotify(title, message, type) {
+      this.$notify({
+        title: title,
+        message: message,
+        type: type
+      });
+    },
   }
 }
 </script>
