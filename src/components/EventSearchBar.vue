@@ -106,8 +106,7 @@
 </template>
 
 <script>
-
-
+import moment from "moment";
 export default {
   name: "event-search-bar",
   data() {
@@ -156,7 +155,7 @@ export default {
     getEvents: function () {
       this.$api.getEvents(this.query)
           .then((response) => {
-            this.$emit('sentEventData', response.data);
+            this.$emit('sentEventData', this.filterEvents(response.data));
           })
           .catch((error) => {
             this.makeNotify('Read All Events', error.response.statusText, 'error');
@@ -217,6 +216,26 @@ export default {
         type: type
       });
     },
+    filterEvents(events) {
+
+      if (this.$currentUser.checkLogin()) {
+        if (!events.length) {
+          this.makeNotify('Searching Events', "Cannot find any events", 'info')
+        }
+        return events;
+      }
+      let allEvents = []
+
+      const now = new Date();
+      events.forEach((event)=> {
+        if (moment(event.date).isAfter(now)) allEvents.push(event);
+      })
+
+      if (!allEvents.length) {
+        this.makeNotify('Searching Events', "Cannot find any events", 'info')
+      }
+      return allEvents;
+    }
   }
 }
 </script>

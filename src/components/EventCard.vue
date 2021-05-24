@@ -20,7 +20,7 @@
               <hr>
               <div class="row responsive">
                 <strong class="col-5">Attendees:</strong>
-                <span class="col-6">{{ event.attendeeCount }}</span>
+                <span class="col-6">{{ event.attendeeCount || 0 }}</span>
               </div>
 
 

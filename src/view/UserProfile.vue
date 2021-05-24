@@ -68,7 +68,7 @@
                   label="Status"
                   width="90"/>
 
-              <el-table-column label="Action" width="150">
+              <el-table-column label="Action" width="180">
                 <template #default="scope">
 
                   <div v-if="scope.row.role === 'organizer' && checkEventDate(scope.row)">
