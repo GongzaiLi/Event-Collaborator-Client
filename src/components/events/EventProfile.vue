@@ -313,7 +313,6 @@ export default {
     getEventAttendees: async function () {
       await this.$api.getEventAttendees(this.eventId, this.$currentUser.getToken())
           .then((response) => {
-            // console.log(response.data);
             this.setUpAttendeesTable(response.data);
           })
           .catch((error) => {
@@ -357,7 +356,6 @@ export default {
     getAllEvents: async function () {
       await this.$api.getEvents('')
           .then((response) => {
-
             response.data.forEach((event) => {
               this.checkSimilarEvent(event);
             })
@@ -376,7 +374,6 @@ export default {
     },
     joinEvent: function () {
       if (this.checkJoinEventAvailable()) {
-
         this.$api.createEventAttendees(this.eventId, this.$currentUser.getToken())
             .then(() => {
               this.makeNotify('Join', "You Success Join a Event", 'success');
@@ -449,7 +446,6 @@ export default {
       }
       return true;
     },
-
     makeNotify(title, message, type) {
       this.$notify({
         title: title,

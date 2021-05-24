@@ -3,7 +3,7 @@
     <el-affix>
       <Navbar/>
     </el-affix>
-    <router-view v-slot="{ Component }"><!-- v-if="isRouterAlive"-->
+    <router-view v-slot="{ Component }" v-if="isRouterAlive"><!-- v-if="isRouterAlive"-->
       <keep-alive>
         <component :is="Component" v-if="$route.meta.keepAlive"/>
       </keep-alive>
@@ -20,24 +20,24 @@ export default {
   components: {
     Navbar,
   },
-  // provide() {// can inject very deep components
-  //   return {
-  //     reload: this.reload
-  //   }
-  // },
-  // data() {
-  //   return {
-  //     isRouterAlive: true,
-  //   }
-  // },
-  // methods: {
-  //   reload() {
-  //     this.isRouterAlive = false;
-  //     this.$nextTick(() => {
-  //       this.isRouterAlive = true;
-  //     })
-  //   }
-  // }
+  provide() {// can inject very deep components
+    return {
+      reload: this.reload
+    }
+  },
+  data() {
+    return {
+      isRouterAlive: true,
+    }
+  },
+  methods: {
+    reload() {
+      this.isRouterAlive = false;
+      this.$nextTick(() => {
+        this.isRouterAlive = true;
+      })
+    }
+  }
 }
 </script>
 

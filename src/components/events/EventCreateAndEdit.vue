@@ -6,7 +6,6 @@
 
           <div class="card-body">
             <div>
-              <!--can change width and height-->
               <img :src="image.imgUrl" class="img-thumbnail rounded mx-auto d-block"
                    width="350" height="350" alt="userImage"
                    @error="setUserImageDefault">
@@ -15,7 +14,7 @@
                   @change="openImage($event)" ref="file" @blur="validateImage($event)"
                   style="margin-top: 0.5em"
               >
-              <button class="btn btn-secondary btn-sm" form="imageInput">Remove Photo</button>
+              <button class="btn btn-secondary btn-sm" form="imageInput" @click="removePhoto">Remove Photo</button>
             </div>
           </div>
           <hr>
@@ -130,6 +129,7 @@ export default {
       type: Function,
     }
   },
+  inject: ['reload'],
   data() {
     let checkDate = (rule, date, callback) => {
       let now = new Date();
@@ -147,7 +147,6 @@ export default {
         callback();
       }
     };
-
     return {
       eventId: 0,
       newEvent: {
@@ -203,7 +202,6 @@ export default {
           {type: 'number', message: 'Please input a Number', trigger: 'blur'},
         ],
       },
-
       options: [],
       image: {
         imgUrl: '',
@@ -255,46 +253,40 @@ export default {
       this.editImage = false;
     },
     eventEdit: async function () {
-      console.log(this.newEvent.url, typeof this.newEvent.url);
-
       await this.$api.editEvent(this.eventId, this.setUpNewEventRequest, this.$currentUser.getToken())
           .then(() => {
-
             if (this.editImage) {
               this.putImage(this.eventId);
             }
-
           })
           .catch((error) => {
-            console.log(error);
+            this.makeNotify('Edit The Event', error.response.statusText, 'error');
           })
-
       window.$('#editUserModal').modal('hide');//
       this.reloadUserProfile();
     },
-
     eventCreate() {
-
       this.$api.createEvent(this.setUpNewEventRequest, this.$currentUser.getToken())
           .then((response) => {
             this.eventId = response.data.eventId
           })
           .then(() => {
             this.putImage(this.eventId);
+            this.makeNotify('Create The Event', 'successful create A Event', 'success');
+
           })
           .catch((error) => {
-            console.log(error);
+            this.makeNotify('Create The Event', error.response.statusText, 'error');
           });
+      this.reload();
     },
     putImage: async function (eventId) {
       await this.$api.putEventImage(eventId, this.image, this.$currentUser.getToken())
           .then(() => {
-            console.log(32222222222222222222222);
-
-            // show successful
+            this.makeNotify('Add Event Image', 'successful add a image', 'success');
           })
           .catch((error) => {
-            console.log(error);
+            this.makeNotify('Add Event Image', error.response.statusText, 'error');
           })
       this.hasImage = false;
     },
@@ -304,15 +296,12 @@ export default {
     setUserImageDefault: function (e) {
       e.target.src = require('../../assets/event-default.jpg');
     },
-
     openImage: function (event) {
       if (event.target.files[0]) {
         this.image.imgUrl = window.URL.createObjectURL(event.target.files[0]);
         this.hasImage = true;
         this.editImage = true;
         this.image.imgBaseData = this.$refs.file.files[0];
-        console.log(this.image.imgBaseData);
-        console.log(this.image.imgBaseData.type);
         event.target.value = '';
       }
     },
@@ -327,7 +316,7 @@ export default {
             this.setOption(response.data);
           })
           .catch((error) => {
-            alert(error.message);
+            this.makeNotify('Read All Categories', error.response.statusText, 'error');
           })
     },
     setOption: function (categories) {
@@ -344,6 +333,13 @@ export default {
       } else {
         return true;
       }
+    },
+    makeNotify(title, message, type) {
+      this.$notify({
+        title: title,
+        message: message,
+        type: type
+      });
     },
   },
   computed: {

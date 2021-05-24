@@ -7,7 +7,6 @@
           v-bind:key="event"
           :event-id='event.eventId'/>
 
-
       <div class="container mt-4 mb-4">
         <div class="d-flex justify-content-center row" style="font-family: 'Arial',serif;">
           Displaying {{ showMin }} - {{ showMax }} of total {{ totalEvents }} results
