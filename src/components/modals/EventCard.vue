@@ -95,8 +95,8 @@ export default {
       categoriesAllTypes: [],
       categoriesResultList: [],
 
-      eventImage: require('../assets/event-default.jpg'),
-      userImage: require('../assets/profile-default.png'),
+      eventImage: require('../../assets/event-default.jpg'),
+      userImage: require('../../assets/profile-default.png'),
       loading: true
 
     }
@@ -133,10 +133,10 @@ export default {
       this.$router.push({name: 'event-profile', params: {eventId: this.eventId}});
     },
     setEventImageDefault: function (e) {
-      e.target.src = require('../assets/event-default.jpg');
+      e.target.src = require('../../assets/event-default.jpg');
     },
     setUserImageDefault: function (e) {
-      e.target.src = require('../assets/profile-default.png');
+      e.target.src = require('../../assets/profile-default.png');
     },
     getCategories: async function () {
       await this.$api.getEventCategories()

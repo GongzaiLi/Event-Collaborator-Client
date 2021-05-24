@@ -212,7 +212,7 @@
 
 <script>
 
-import EventCard from "../components/EventCard";
+import EventCard from "../modals/EventCard";
 // import { ElMessageBox } from 'element-plus';
 export default {
   name: "event-profile",
@@ -331,10 +331,10 @@ export default {
       })
     },
     setUserImageDefault: function (e) {
-      e.target.src = require('../assets/profile-default.png');
+      e.target.src = require('../../assets/profile-default.png');
     },
     setEventImageDefault: function (e) {
-      e.target.src = require('../assets/event-default.jpg');
+      e.target.src = require('../../assets/event-default.jpg');
     },
     setUpAttendeesTable: function (users) {
       this.tableData = [];

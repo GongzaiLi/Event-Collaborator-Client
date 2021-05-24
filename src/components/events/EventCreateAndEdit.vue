@@ -208,7 +208,7 @@ export default {
       image: {
         imgUrl: '',
         imgBaseData: '',
-        defaultImage: require('../assets/event-default.jpg'),
+        defaultImage: require('../../assets/event-default.jpg'),
         initImage() {
           this.imgUrl = this.defaultImage;
         },
@@ -302,7 +302,7 @@ export default {
       this.$refs[formName].resetFields();
     },
     setUserImageDefault: function (e) {
-      e.target.src = require('../assets/event-default.jpg');
+      e.target.src = require('../../assets/event-default.jpg');
     },
 
     openImage: function (event) {

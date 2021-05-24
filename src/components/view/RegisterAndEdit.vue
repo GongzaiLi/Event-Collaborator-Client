@@ -156,7 +156,7 @@ export default {
       image: {
         imgUrl: '',
         imgBaseData: '',
-        defaultImage: require('../assets/profile-default.png'),
+        defaultImage: require('../../assets/profile-default.png'),
         initImage() {
           this.imgUrl = this.defaultImage;
         },
@@ -217,7 +217,7 @@ export default {
               this.goToUserPage();
             })
             .catch((error) => {
-              this.makeNotify('Register a New User', error.response.statusText, 'error');
+              this.makeNotify('Register a New user', error.response.statusText, 'error');
             });
       }
     },
@@ -229,7 +229,7 @@ export default {
               return true;
             })
             .catch((error) => {
-              this.makeNotify('add or edit User Image', error.response.statusText, 'error');
+              this.makeNotify('add or edit user Image', error.response.statusText, 'error');
             })
       } else if (this.editModal && !this.hasImage) {
         await this.$api.deleteUserImage(userId, this.$currentUser.getToken())
@@ -237,7 +237,7 @@ export default {
               return true;
             })
             .catch((error) => {
-              this.makeNotify('Delete User Image', error.response.statusText, 'error');
+              this.makeNotify('Delete user Image', error.response.statusText, 'error');
             })
       }
       return false;
@@ -265,7 +265,7 @@ export default {
           })
           .catch((error) => {
             this.cleanUserInfo();
-            this.makeNotify('Edit A User', error.response.statusText, 'error');
+            this.makeNotify('Edit A user', error.response.statusText, 'error');
             //this.reloadUserProfile();
           })
       window.$('#editUserModal').modal('hide');//
@@ -299,7 +299,7 @@ export default {
       }
     },
     setUserImageDefault: function (e) {
-      e.target.src = require('../assets/profile-default.png');
+      e.target.src = require('../../assets/profile-default.png');
     },
     editUserSetUp: function (user) {
       this.userInfo.firstName = user.firstName;

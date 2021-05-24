@@ -35,8 +35,8 @@
 
 <script>
 
-import EventSearchBar from "../components/EventSearchBar";
-import EventCard from "../components/EventCard";
+import EventSearchBar from "../modals/EventSearchBar";
+import EventCard from "../modals/EventCard";
 
 
 export default {

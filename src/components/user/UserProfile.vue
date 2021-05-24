@@ -150,8 +150,8 @@
 </template>
 
 <script>
-import RegisterAndEdit from "./RegisterAndEdit";
-import EventCreateAndEdit from "./EventCreateAndEdit";
+import RegisterAndEdit from "../view/RegisterAndEdit";
+import EventCreateAndEdit from "../events/EventCreateAndEdit";
 
 export default {
   name: "UserProfile",
@@ -207,14 +207,14 @@ export default {
           .catch((error) => {
             this.foundUser = false;
             this.loading = false;
-            this.makeNotify('Get A User', error.response.statusText, 'error');
+            this.makeNotify('Get A user', error.response.statusText, 'error');
           });
     },
     /**
      * if image error set a default image
      **/
     setUserImageDefault: function (e) {
-      e.target.src = require('../assets/profile-default.png');
+      e.target.src = require('../../assets/profile-default.png');
     },
     /**
      * call get event api
@@ -292,7 +292,7 @@ export default {
             this.setUpUserProfile();
           })
           .catch((error) => {
-            this.makeNotify('User Profile', error.response.statusText, 'error');
+            this.makeNotify('user Profile', error.response.statusText, 'error');
           });
     },
     /**
@@ -302,7 +302,7 @@ export default {
       this.$router.push({name: 'event-profile', params: {eventId: event.eventId}});
     },
     setEventImageDefault: function (e) {
-      e.target.src = require('../assets/event-default.jpg');
+      e.target.src = require('../../assets/event-default.jpg');
     },
     checkTableHadItem(eventId) {
       for (const item of this.tableData) {
