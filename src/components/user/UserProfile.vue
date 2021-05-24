@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import RegisterAndEdit from "../view/RegisterAndEdit";
+import RegisterAndEdit from "../modals/RegisterAndEdit";
 import EventCreateAndEdit from "../events/EventCreateAndEdit";
 
 export default {

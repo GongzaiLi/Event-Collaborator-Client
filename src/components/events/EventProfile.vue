@@ -212,7 +212,7 @@
 
 <script>
 
-import EventCard from "../modals/EventCard";
+import EventCard from "./EventCard";
 // import { ElMessageBox } from 'element-plus';
 export default {
   name: "event-profile",

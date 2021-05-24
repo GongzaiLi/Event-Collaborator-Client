@@ -1,6 +1,6 @@
 import {createWebHistory, createRouter} from "vue-router";
-import Login from '../components/view/Login';
-import RegisterAndEdit from '../components/view/RegisterAndEdit';
+import Login from '../components/modals/Login';
+import RegisterAndEdit from '../components/modals/RegisterAndEdit';
 import UserProfile from "../components/user/UserProfile";
 import EventSearch from "../components/events/EventSearch";
 import EventProfile from "../components/events/EventProfile";
