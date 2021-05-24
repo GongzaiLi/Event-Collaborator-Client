@@ -260,7 +260,7 @@ export default {
             this.$router.go(0);
             this.reloadUserProfile();
             this.cleanUserInfo();
-            // this.makeNotify('Edit your info', "Successful edit", 'success');
+            //this.makeNotify('Edit your info', "Successful edit", 'success');
 
           })
           .catch((error) => {

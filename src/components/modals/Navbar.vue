@@ -43,7 +43,6 @@
 </template>
 
 <script>
-// import Api from '../api';
 
 export default {
   name: "Navbar",
@@ -56,7 +55,6 @@ export default {
   methods: {
     goToLoginPage: function () {
       this.$router.push({name: 'login'});
-      // this.reload();
     },
     goToRegisterPage: function () {
       this.$router.push({name: 'register'});
@@ -72,15 +70,22 @@ export default {
         .then(() => {//IIFE
           this.goToLoginPage();
         })
-        .catch(() => {
-          // alert(error.message);
+        .catch((error) => {
+          this.makeNotify('Log out', error.response.statusText, 'error');
         });
       //this.goToLoginPage();
       this.$currentUser.deleteToken();
     },
     goToCreateEventPage: function () {
       this.$router.push({name: 'event-create'});
-    }
+    },
+    makeNotify(title, message, type) {
+      this.$notify({
+        title: title,
+        message: message,
+        type: type
+      });
+    },
   },
   watch: {
     //todo watch and check the user login or not
