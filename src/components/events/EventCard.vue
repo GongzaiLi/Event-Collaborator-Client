@@ -1,6 +1,6 @@
 <template>
   <div v-show="!loading">
-    <div class="container mt-6 mb-2">
+    <div class="container mt-6 mb-2" style="height: 100%">
       <div class="d-flex justify-content-center row"><!-- justify-content-center means center   d-flex a container-->
         <div class="col-md-10">
           <div class="row p-2 bg-white border shadow" @click="goToEventProfile"><!--rounded-->
