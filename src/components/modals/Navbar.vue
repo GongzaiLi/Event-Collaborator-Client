@@ -60,7 +60,7 @@ export default {
       this.$router.push({name: 'register'});
     },
     goToUserPage: function () {
-      this.$router.push({name: 'user-profile', params: {userId: this.$currentUser.getUserId()}});//todo change later
+      this.$router.push({name: 'user-profile', params: {userId: this.$currentUser.getUserId()}});
     },
     goToEventPage: function () {
       this.$router.push({name: 'event-search'});
