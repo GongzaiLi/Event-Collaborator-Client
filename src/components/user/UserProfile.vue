@@ -1,7 +1,7 @@
 <template>
 
   <div class="row py-5 px-4" v-if="!loading">
-    <div class="col-md-8 mx-auto" v-if="foundUser">
+    <div class="col-md-7 mx-auto" v-if="foundUser">
       <div class="bg-white shadow rounded overflow-hidden">
 
         <div class="px-4 pt-0 pb-4 cover">
@@ -27,58 +27,69 @@
 
 
         <div class="px-4 py-3">
-          <h5 class="mb-0">Participating event</h5>
-          <div class="p-4 rounded shadow-sm bg-light">
-            <el-table
+          <el-row :gutter="20" class="mb-2">
+            <el-col :span="5"><h5 class="mb-0">Participating event</h5></el-col>
+            <el-tooltip class="item" content="Switch Manager Event Table Or detail card"
+                        placement="top-start" effect="light">
+              <el-col :span="5">
+                <el-switch v-model="switchTable" active-color="#13ce66" inactive-color="#ff4949"/>
+              </el-col>
+            </el-tooltip>
+          </el-row>
+          <div class="p-4 rounded shadow-sm bg-light" v-if="switchTable">
+
+            <el-tooltip class="item" content="Click the Event You Can See the Detail About The Event"
+                        placement="top-start" effect="light">
+              <el-table
                 :data="tableData"
                 stripe
                 style="width: 100%"
                 :default-sort="{prop: 'eventId', order: 'increasing'}"
                 max-height="500"
                 @row-click="goToEventProfile"
-            >
-              <el-table-column min-width="50" prop="image" label="Image" width="100">
-                <template v-slot="scope">
-                  <img class="rounded" :src="scope.row.image" width="50" height="50" alt="user"
-                       @error="setEventImageDefault"/>
-                </template>
-              </el-table-column>
-              <el-table-column
+              >
+                <el-table-column min-width="50" prop="image" label="Image" width="100">
+                  <template v-slot="scope">
+                    <img class="rounded" :src="scope.row.image" width="50" height="50" alt="user"
+                         @error="setEventImageDefault"/>
+                  </template>
+                </el-table-column>
+                <el-table-column
                   prop="eventId"
                   label="Id"
                   sortable
                   width="80"/>
-              <el-table-column
+                <el-table-column
                   prop="title"
                   label="Title"
                   sortable
                   width="150"/>
-              <el-table-column
+                <el-table-column
                   prop="date"
                   label="Date"
                   sortable
                   width="200"/>
-              <el-table-column
+                <el-table-column
                   prop="role"
                   label="Role"
                   sortable
                   width="100"/>
-              <el-table-column
+                <el-table-column
                   prop="status"
                   label="Status"
                   width="90"/>
 
-              <el-table-column label="Action" width="180">
-                <template #default="scope">
+                <el-table-column label="Action" width="180">
+                  <template #default="scope">
 
-                  <div v-if="scope.row.role === 'organizer' && checkEventDate(scope.row)">
-                    <el-button
+                    <div v-if="scope.row.role === 'organizer' && checkEventDate(scope.row)">
+                      <el-button
                         size="mini"
                         type="success"
                         @click.stop="eventEdit(scope.row)">Edit
-                    </el-button>
+                      </el-button>
 
-                    <el-popconfirm
+                      <el-popconfirm
                         confirmButtonText='Ok'
                         cancelButtonText='Cancel'
                         icon="el-icon-info"
@@ -86,26 +97,36 @@
                         title="DO YOU WANT TO EDIT THE EVENT？"
                         @Confirm="eventDelete(scope.row)"
                         @Cancel="()=>{}"
-                    >
-                      <template #reference>
-                        <el-button
+                      >
+                        <template #reference>
+                          <el-button
                             size="mini"
                             type="danger"
-                        >Delete
-                        </el-button><!-- @click="handleDelete(scope.$index, scope.row)"-->
+                          >Delete
+                          </el-button><!-- @click="handleDelete(scope.$index, scope.row)"-->
 
-                      </template>
+                        </template>
 
-                    </el-popconfirm>
-                  </div>
-                  <div v-else>
-                    <span>No privilege</span>
-                  </div>
-                </template>
-              </el-table-column>
+                      </el-popconfirm>
+                    </div>
+                    <div v-else>
+                      <span>No privilege</span>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-tooltip>
+          </div>
 
-            </el-table>
-
+          <div v-else class="p-4 rounded">
+            <el-tooltip class="item" content="Click the Event You Can See the Detail About The Event"
+                        placement="top-start" effect="light">
+              <el-carousel indicator-position="outside" height="420px">
+                <el-carousel-item v-for="event of tableData" v-bind:key="event">
+                  <event-card :event-id="event.id"/>
+                </el-carousel-item>
+              </el-carousel>
+            </el-tooltip>
           </div>
         </div>
 
@@ -124,14 +145,15 @@
                   <el-button type="danger" class="btn btn-outline-danger" data-dismiss="modal" circle
                              icon="el-icon-close"/>
                 </div>
-                <event-create-and-edit v-if="eventModal" :edit-modal="true" :edit-event-info="editEventInfo" :reload-user-profile="setUpUserProfile"/>
+                <event-create-and-edit v-if="eventModal" :edit-modal="true" :edit-event-info="editEventInfo"
+                                       :reload-user-profile="setUpUserProfile"/>
                 <register-and-edit
-                    v-else
-                    :edit-modal="true"
-                    :edit-user-info="user"
-                    :edit-user-image="userImage"
-                    :user-id="parseInt(userId)"
-                    :reload-user-profile="setUpUserProfile"/>
+                  v-else
+                  :edit-modal="true"
+                  :edit-user-info="user"
+                  :edit-user-image="userImage"
+                  :user-id="parseInt(userId)"
+                  :reload-user-profile="setUpUserProfile"/>
               </div>
             </div>
           </div>
@@ -152,10 +174,13 @@
 <script>
 import RegisterAndEdit from "../modals/RegisterAndEdit";
 import EventCreateAndEdit from "../events/EventCreateAndEdit";
+import EventCard from "../events/EventCard";
+
 
 export default {
   name: "UserProfile",
   components: {
+    EventCard,
     RegisterAndEdit,
     EventCreateAndEdit
   },
@@ -172,7 +197,8 @@ export default {
       tableData: [],
       eventModal: true,
       editEventInfo: {},
-      loading: true
+      loading: true,
+      switchTable: true
     }
   },
   mounted() {
@@ -198,17 +224,17 @@ export default {
      **/
     getUser: async function (userId) {
       await this.$api.getUser(userId, this.$currentUser.getToken())
-          .then((response) => {
-            this.user = response.data;
-            this.userImage = this.$api.getUserImage(this.userId);
-            this.foundUser = true;
-            this.loading = false;
-          })
-          .catch((error) => {
-            this.foundUser = false;
-            this.loading = false;
-            this.makeNotify('Get A user', error.response.statusText, 'error');
-          });
+        .then((response) => {
+          this.user = response.data;
+          this.userImage = this.$api.getUserImage(this.userId);
+          this.foundUser = true;
+          this.loading = false;
+        })
+        .catch((error) => {
+          this.foundUser = false;
+          this.loading = false;
+          this.makeNotify('Get A user', error.response.statusText, 'error');
+        });
     },
     /**
      * if image error set a default image
@@ -222,33 +248,33 @@ export default {
     getEvents: async function () {
       this.tableData = [];
       await this.$api.getEvents('')
-          .then((response) => {
-            response.data.forEach(async (event) => {
-              await this.getEventsAttendees(event.eventId)
-              await this.$api.getEvent(event.eventId).then((response) => {
-                if (response.data.organizerId === parseInt(this.userId)) {
-                  this.setUpTheTable(response.data, "accepted");
-                }
-              });
-            })
+        .then((response) => {
+          response.data.forEach(async (event) => {
+            await this.getEventsAttendees(event.eventId)
+            await this.$api.getEvent(event.eventId).then((response) => {
+              if (response.data.organizerId === parseInt(this.userId)) {
+                this.setUpTheTable(response.data, "accepted");
+              }
+            });
           })
-          .catch((error) => {
-            this.makeNotify('Get ALl Event', error.response.statusText, 'error');
-          })
+        })
+        .catch((error) => {
+          this.makeNotify('Get ALl Event', error.response.statusText, 'error');
+        })
     },
     /**
      * call api get Event attendees
      **/
     getEventsAttendees: async function (eventId) {
       await this.$api.getEventAttendees(eventId, this.$currentUser.getToken())
-          .then((response) => {
-            response.data.forEach(async (user) => {
-              if (user.attendeeId === parseInt(this.userId)) await this.getEvent(eventId, user.status);
-            })
+        .then((response) => {
+          response.data.forEach(async (user) => {
+            if (user.attendeeId === parseInt(this.userId)) await this.getEvent(eventId, user.status);
           })
-          .catch((error) => {
-            this.makeNotify('Get Event Attendees', error.response.statusText, 'error');
-          })
+        })
+        .catch((error) => {
+          this.makeNotify('Get Event Attendees', error.response.statusText, 'error');
+        })
 
 
     },
@@ -257,12 +283,12 @@ export default {
      **/
     getEvent: async function (eventId, status) {
       await this.$api.getEvent(eventId)
-          .then((response) => {
-            this.setUpTheTable(response.data, status)
-          })
-          .catch((error) => {
-            this.makeNotify('Get a Event', error.response.statusText, 'error');
-          })
+        .then((response) => {
+          this.setUpTheTable(response.data, status)
+        })
+        .catch((error) => {
+          this.makeNotify('Get a Event', error.response.statusText, 'error');
+        })
     },
     /**
      * set up the table
@@ -288,12 +314,12 @@ export default {
     },
     eventDelete(row) {
       this.$api.deleteEvent(row.eventId, this.$currentUser.getToken())
-          .then(() => {
-            this.setUpUserProfile();
-          })
-          .catch((error) => {
-            this.makeNotify('user Profile', error.response.statusText, 'error');
-          });
+        .then(() => {
+          this.setUpUserProfile();
+        })
+        .catch((error) => {
+          this.makeNotify('user Profile', error.response.statusText, 'error');
+        });
     },
     /**
      * go to event Profile
@@ -347,5 +373,11 @@ export default {
 </script>
 
 <style scoped>
+.el-carousel__item:nth-child(2n) {
+  background-color: #FFFFFF;
+}
 
+.el-carousel__item:nth-child(2n+1) {
+  background-color: #FFFFFF;
+}
 </style>

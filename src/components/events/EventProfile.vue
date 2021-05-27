@@ -30,7 +30,7 @@
             <h5 class="mt-0 mb-1"><i class="el-icon-ship"/> Attendees: {{ event.attendeeCount }}
               (Available:{{ availableSeat }})</h5>
             <!-- only accepted-->
-            <h5 class="mt-0 mb-1"><i class="el-icon-loading"/> Url:
+            <h5 class="mt-0 mb-1"><i class="el-icon-mouse"/> Url:
               {{ setUrl }}</h5>
             <h5 class="mt-0 mb-1"><i class="el-icon-place"/> Venue: {{ event.venue }}</h5>
             <h5 class="mt-0 mb-1"><i class="el-icon-money"/> Fee: {{ event.fee > 0 ? event.fee : "Free" }}</h5>
@@ -77,10 +77,6 @@
               <template v-slot="scope">
                 <img class="rounded" :src="scope.row.image" width="50" height="50" alt="user"
                      @error="setUserImageDefault"/>
-                <!--                <el-image-->
-                <!--                    style="width: 50px; height: 50px"-->
-                <!--                    :src="scope.row.image"-->
-                <!--                    fit="scale-down"/>-->
               </template>
             </el-table-column>
             <el-table-column
@@ -92,7 +88,7 @@
                 prop="lastName"
                 label="Last Name"
                 sortable
-                :width="checkRole? 150: 450"
+                :width="checkRole? 150: 600"
             />
 
             <el-table-column
@@ -141,7 +137,7 @@
 
             <el-carousel indicator-position="outside" height="420px">
               <el-carousel-item v-for="eventId in similarEvents" v-bind:key="eventId">
-                <event-card :event-id="eventId" @click="reload"/><!-- @click="reload" -->
+                <event-card :event-id="eventId" @click="reload"/>
               </el-carousel-item>
             </el-carousel>
           </div>

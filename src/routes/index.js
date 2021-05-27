@@ -28,7 +28,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     if ((to.name === 'event-create' || to.name === 'user-profile') && !auth.checkLogin()) {
         next({name: 'login'})
-    } else if (to.name === 'login' && auth.checkLogin()) {
+    } else if ((to.name === 'login' || to.name === 'register') && auth.checkLogin()) {
         next({name: 'user-profile', params: {userId: auth.getUserId()}})
     } else {
         next()
