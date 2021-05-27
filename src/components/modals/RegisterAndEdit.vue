@@ -258,13 +258,15 @@ export default {
           })
           .then(() => {
             this.$router.go(0);
-            this.reloadUserProfile();
             this.cleanUserInfo();
+            this.reloadUserProfile();
+
             //this.makeNotify('Edit your info', "Successful edit", 'success');
 
           })
           .catch((error) => {
             this.cleanUserInfo();
+            this.reloadUserProfile();
             this.makeNotify('Edit A user', error.response.statusText, 'error');
             //this.reloadUserProfile();
           })

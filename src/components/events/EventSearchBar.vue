@@ -190,9 +190,13 @@ export default {
           this.query += `categoryIds=${id}`;
         }
       }
+
       if (this.searchParameters.sortBy.length) {
         this.query += (this.query.length) ? '&' : '?';
         this.query += `sortBy=${this.sortByOptionList[this.searchParameters.sortBy]}`;
+      } else {
+        this.query += (this.query.length) ? '&' : '?';
+        this.query += `sortBy=${this.sortByOptionList['Date (Old To New)']}`;
       }
 
     },

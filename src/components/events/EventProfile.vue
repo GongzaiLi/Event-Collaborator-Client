@@ -88,15 +88,14 @@
                 prop="lastName"
                 label="Last Name"
                 sortable
-                :width="checkRole? 150: 600"
+                :width="150"
             />
 
             <el-table-column
-                v-if="checkRole"
                 prop="role"
                 label="Role"
                 sortable
-                width="100"/>
+                width="checkRole? 150: 450"/>
 
             <el-table-column
                 v-if="checkRole"
