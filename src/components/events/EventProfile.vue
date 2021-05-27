@@ -429,13 +429,16 @@ export default {
     checkLogin: function () {
       if (!this.$currentUser.checkLogin()) {
         this.$confirm('If You Do Not Have account Please register', 'Please Login', {
+          distinguishCancelAndClose: true,
           confirmButtonText: 'Login',
           cancelButtonText: 'Register',
           center: true
         }).then(() => {
           this.goToLoginPage();
-        }).catch(() => {
-          this.goToRegisterPage();
+        }).catch(action => {
+          if (action === 'cancel') {
+            this.goToRegisterPage();
+          }
         });
         return false;
       }
